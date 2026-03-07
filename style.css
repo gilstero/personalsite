@@ -173,3 +173,23 @@ body {
       aspect-ratio: 4 / 3;
     }
   }
+
+  .profile-links {
+    margin-top: 14px;
+    display: flex;
+    gap: 14px;
+    align-items: center;
+  }
+  
+  .profile-links img {
+    width: 26px;
+    height: 26px;
+    object-fit: contain;
+    opacity: 0.8;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+  }
+  
+  .profile-links img:hover {
+    transform: translateY(-2px);
+    opacity: 1;
+  }
