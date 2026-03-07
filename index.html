@@ -19,7 +19,7 @@
 
   <main>
     <div class="profile">
-      <img src="assets/profile.jpg" alt="Profile Photo">
+      <img src="https://media.licdn.com/dms/image/v2/D5603AQFleksaWjisyQ/profile-displayphoto-shrink_400_400/B56ZS06bJrHsAs-/0/1738202004281?e=1774483200&v=beta&t=6vBcgj5mWgDSpqeiYT5PiyaOModIKRg5gxWz4_Iv4zc" alt="Profile Photo">
 
       <div>
         <h1>Hi, I’m Olin Gilster</h1>
@@ -33,13 +33,71 @@
           multi-level treatment allocation algorithms in Python and develop tools for
           experiment orchestration and visualization.
         </p>
-        <p>
-          <a href="experience.html">Experience</a> /
-          <a href="projects.html">Projects</a> /
-          <a href="blog.html">Blog</a>
-        </p>
+          
       </div>
     </div>
+    <section class="photo-gallery-section">
+        <h2>Photos</h2>
+      
+        <div id="photo-grid" class="photo-grid">
+          <div class="photo-card rect">
+            <img src="https://res.cloudinary.com/dxnjfdimu/image/upload/v1772849646/IMG_7040_2_rvtiux.jpg" alt="Photo 1">
+          </div>
+      
+          <div class="photo-card square">
+            <img src="https://res.cloudinary.com/dxnjfdimu/image/upload/v1772849645/IMG_7934_daqbit.jpg" alt="Photo 2">
+          </div>
+      
+          <div class="photo-card square">
+            <img src="https://res.cloudinary.com/dxnjfdimu/image/upload/v1772849643/IMG_1283_nx0n7q.jpg" alt="Photo 3">
+          </div>
+      
+          <div class="photo-card rect">
+            <img src="https://res.cloudinary.com/dxnjfdimu/image/upload/v1772849642/IMG_1136_veb03m.jpg" alt="Photo 4">
+          </div>
+        </div>
+      </section>
+      
+      <div id="lightbox" class="lightbox">
+        <span class="lightbox-close">&times;</span>
+        <img id="lightbox-img" class="lightbox-img" src="" alt="">
+      </div>
+      
+      <script>
+        const lightbox = document.getElementById("lightbox");
+        const lightboxImg = document.getElementById("lightbox-img");
+        const photoImages = document.querySelectorAll(".photo-card img");
+        const closeBtn = document.querySelector(".lightbox-close");
+      
+        photoImages.forEach((img) => {
+          img.addEventListener("click", () => {
+            lightboxImg.src = img.src;
+            lightboxImg.alt = img.alt;
+            lightbox.classList.add("active");
+            document.body.classList.add("no-scroll");
+          });
+        });
+      
+        function closeLightbox() {
+          lightbox.classList.remove("active");
+          lightboxImg.src = "";
+          document.body.classList.remove("no-scroll");
+        }
+      
+        closeBtn.addEventListener("click", closeLightbox);
+      
+        lightbox.addEventListener("click", (e) => {
+          if (e.target === lightbox || e.target === lightboxImg) {
+            closeLightbox();
+          }
+        });
+      
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape") {
+            closeLightbox();
+          }
+        });
+      </script>
   </main>
 </body>
 </html>

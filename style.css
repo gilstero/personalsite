@@ -2,8 +2,12 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     color: #111;
-    background: #fff;
+    background: #f7f7f7;
     line-height: 1.6;
+  }
+  
+  body.no-scroll {
+    overflow: hidden;
   }
   
   header {
@@ -12,6 +16,7 @@ body {
     width: 100%;
     background: white;
     border-bottom: 1px solid #ddd;
+    z-index: 1000;
   }
   
   nav {
@@ -43,6 +48,17 @@ body {
     display: flex;
     align-items: center;
     gap: 28px;
+    background: white;
+    padding: 28px;
+    border-radius: 18px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    margin-bottom: 32px;
+  }
+  
+  .profile:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.14);
   }
   
   .profile img {
@@ -52,14 +68,108 @@ body {
     border-radius: 50%;
   }
   
-  section {
-    margin-bottom: 40px;
+  .photo-gallery-section h2 {
+    margin-bottom: 16px;
   }
   
-  h1, h2 {
-    margin-bottom: 10px;
+  .photo-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    grid-auto-flow: dense;
   }
   
-  ul {
-    padding-left: 20px;
+  .photo-card {
+    overflow: hidden;
+    border-radius: 18px;
+    background: white;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    cursor: pointer;
+  }
+  
+  .photo-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.14);
+  }
+  
+  .photo-card.square {
+    grid-column: span 1;
+    aspect-ratio: 1 / 1;
+  }
+  
+  .photo-card.rect {
+    grid-column: span 2;
+    aspect-ratio: 2 / 1;
+  }
+  
+  .photo-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  
+  /* Lightbox */
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.82);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 2000;
+  }
+  
+  .lightbox.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  
+  .lightbox-img {
+    max-width: min(1100px, 92vw);
+    max-height: 88vh;
+    width: auto;
+    height: auto;
+    border-radius: 16px;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+    cursor: zoom-out;
+    transform: scale(0.96);
+    transition: transform 0.2s ease;
+  }
+  
+  .lightbox.active .lightbox-img {
+    transform: scale(1);
+  }
+  
+  .lightbox-close {
+    position: absolute;
+    top: 22px;
+    right: 30px;
+    font-size: 40px;
+    line-height: 1;
+    color: white;
+    cursor: pointer;
+    user-select: none;
+  }
+  
+  @media (max-width: 700px) {
+    .profile {
+      flex-direction: column;
+      text-align: center;
+    }
+  
+    .photo-grid {
+      grid-template-columns: 1fr;
+    }
+  
+    .photo-card.square,
+    .photo-card.rect {
+      grid-column: span 1;
+      aspect-ratio: 4 / 3;
+    }
   }
