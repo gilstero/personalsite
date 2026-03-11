@@ -21,6 +21,9 @@ let hoveredMachineId = null;
 
 const keys = {};
 
+const focusButton = document.getElementById("focusButton");
+let gameFocused = false;
+
 /*
   Creates and returns a machine object.
   Each machine has a position, size, cost, income gain, and purchase status.
@@ -328,6 +331,54 @@ function drawPurchasePrompt() {
   ctx.font = "14px Arial";
   ctx.fillText("Stand on the green machine pad to purchase it.", boxX + 16, boxY + 47);
 }
+
+/*
+  Toggles whether the game has keyboard focus.
+  When focused, movement keys will not scroll the page.
+*/
+focusButton.addEventListener("click", () => {
+
+    gameFocused = !gameFocused;
+  
+    if (gameFocused) {
+      focusButton.textContent = "Release Game";
+    } else {
+      focusButton.textContent = "Focus Game";
+    }
+  
+  });
+
+  /*
+  Tracks key presses and allows machine purchasing with E.
+  Prevents page scrolling when the game is focused.
+*/
+window.addEventListener("keydown", (e) => {
+
+    if (!gameFocused) return;
+  
+    if (
+      ["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"," "].includes(e.key)
+    ) {
+      e.preventDefault();
+    }
+  
+    keys[e.key] = true;
+  
+    if (e.key === "e" || e.key === "E") {
+      buyHoveredMachine();
+    }
+  });
+  
+  /*
+    Removes keys from the active key list when released.
+  */
+  window.addEventListener("keyup", (e) => {
+  
+    if (!gameFocused) return;
+  
+    keys[e.key] = false;
+  
+  });
 
 /*
   Main game loop.
