@@ -17,24 +17,24 @@ const GAME_HEIGHT = canvas.height;
 let gameFocused = false;
 const keys = {};
 
-const player = {
-  x: 130,
-  y: 300,
-  w: 28,
-  h: 28,
-  speed: 3.4,
-  color: "#222"
-};
+// Jada sprites
+const jadaIdle = new Image();
+jadaIdle.src = "assets/jadaassets/jada.png";
+
+const jadaMoving = new Image();
+jadaMoving.src = "assets/jadaassets/jadamoving.png";
 
 const jada = {
-  x: 520,
-  y: 305,
-  w: 64,
-  h: 42,
-  targetX: 520,
-  targetY: 305,
-  moveTimer: 0
-};
+    x: 130,
+    y: 300,
+    w: 70,
+    h: 70,
+    speed: 3.0,
+    targetX: 130,
+    targetY: 300,
+    isMoving: false,
+    facingLeft: false
+  };
 
 const stats = {
   happiness: 100,
@@ -49,39 +49,7 @@ let lastStatTick = 0;
 let promptText = "";
 let totalCareScore = 0;
 
-/*
-  Defines the interactive areas in the game.
-  The player can stand in these zones and press E to care for Jada.
-*/
-const zones = [
-  {
-    id: "food",
-    label: "Food Bowl",
-    x: 70,
-    y: 120,
-    w: 120,
-    h: 90,
-    color: "#f4b183"
-  },
-  {
-    id: "groom",
-    label: "Grooming Station",
-    x: 70,
-    y: 400,
-    w: 140,
-    h: 90,
-    color: "#9dc3e6"
-  },
-  {
-    id: "walk",
-    label: "Walk Door",
-    x: 840,
-    y: 220,
-    w: 110,
-    h: 140,
-    color: "#a9d18e"
-  }
-];
+const zones = [];
 
 /*
   Toggles whether the game has focus.
@@ -161,28 +129,6 @@ function clamp(value, min, max) {
 }
 
 /*
-  Prevents the player from moving outside the screen.
-*/
-function clampPlayer() {
-  player.x = clamp(player.x, 0, GAME_WIDTH - player.w);
-  player.y = clamp(player.y, 0, GAME_HEIGHT - player.h);
-}
-
-/*
-  Updates the player's movement based on WASD or arrow keys.
-*/
-function updatePlayer() {
-  if (!gameFocused || gameOver) return;
-
-  if (keys["ArrowUp"] || keys["w"] || keys["W"]) player.y -= player.speed;
-  if (keys["ArrowDown"] || keys["s"] || keys["S"]) player.y += player.speed;
-  if (keys["ArrowLeft"] || keys["a"] || keys["A"]) player.x -= player.speed;
-  if (keys["ArrowRight"] || keys["d"] || keys["D"]) player.x += player.speed;
-
-  clampPlayer();
-}
-
-/*
   Slowly lowers Jada's needs over time.
   Happiness is influenced by the other needs.
 */
@@ -223,37 +169,16 @@ function updateStats(timestamp) {
 }
 
 /*
-  Makes Jada wander around the center of the room a bit
-  so she feels more alive.
-*/
-function updateJada(timestamp) {
-  if (gameOver) return;
-
-  if (jada.moveTimer <= 0) {
-    jada.targetX = 420 + Math.random() * 220;
-    jada.targetY = 180 + Math.random() * 220;
-    jada.moveTimer = 80 + Math.random() * 100;
-  }
-
-  const dx = jada.targetX - jada.x;
-  const dy = jada.targetY - jada.y;
-
-  jada.x += dx * 0.01;
-  jada.y += dy * 0.01;
-  jada.moveTimer -= 1;
-}
-
-/*
-  Returns the zone the player is currently standing in, if any.
+  Returns the zone Jada is currently standing in, if any.
 */
 function getActiveZone() {
-  for (const zone of zones) {
-    if (rectsOverlap(player, zone)) {
-      return zone;
+    for (const zone of zones) {
+      if (rectsOverlap(jada, zone)) {
+        return zone;
+      }
     }
+    return null;
   }
-  return null;
-}
 
 /*
   Performs the zone action when the player presses E.
@@ -286,14 +211,11 @@ function interactWithZone() {
   Resets the game to its initial state.
 */
 function resetGame() {
-  player.x = 130;
-  player.y = 300;
 
-  jada.x = 520;
-  jada.y = 305;
-  jada.targetX = 520;
-  jada.targetY = 305;
-  jada.moveTimer = 0;
+  jada.x = 130;
+  jada.y = 300;
+  jada.isMoving = false;
+  jada.facingLeft = false;
 
   stats.happiness = 100;
   stats.hunger = 100;
@@ -360,33 +282,22 @@ function drawZones() {
 }
 
 /*
-  Draws the player as Jada's owner.
-*/
-function drawPlayer() {
-  ctx.fillStyle = "#222";
-  ctx.fillRect(player.x, player.y, player.w, player.h);
-}
-
-/*
-  Draws Jada as a simple doodle dog made from rectangles and circles.
+  Draws Jada using sprites.
+  Idle sprite when not moving, walking sprite when moving.
+  Flips the sprite when facing left.
 */
 function drawJada() {
-  const x = jada.x;
-  const y = jada.y;
-
-  ctx.fillStyle = "#d9b38c";
-  ctx.fillRect(x, y, 46, 26);
-
-  ctx.fillRect(x + 35, y - 8, 20, 18);
-
-  ctx.fillRect(x + 6, y + 22, 7, 20);
-  ctx.fillRect(x + 34, y + 22, 7, 20);
-
-  ctx.fillRect(x - 10, y + 4, 14, 6);
-
-  ctx.fillStyle = "#8b5e3c";
-  ctx.fillRect(x + 39, y - 3, 4, 4);
-}
+    const sprite = jada.isMoving ? jadaMoving : jadaIdle;
+  
+    if (jada.facingLeft) {
+      ctx.save();
+      ctx.scale(-1, 1);
+      ctx.drawImage(sprite, -jada.x - jada.w, jada.y, jada.w, jada.h);
+      ctx.restore();
+    } else {
+      ctx.drawImage(sprite, jada.x, jada.y, jada.w, jada.h);
+    }
+  }
 
 /*
   Draws the HUD showing Jada's current care stats.
@@ -475,23 +386,60 @@ function drawEndScreen() {
 }
 
 /*
+  Updates Jada's movement based on WASD or arrow keys.
+  Also tracks whether she is moving and which direction she is facing.
+*/
+function updateJada() {
+    if (!gameFocused || gameOver) {
+      jada.isMoving = false;
+      return;
+    }
+  
+    let moved = false;
+  
+    if (keys["ArrowUp"] || keys["w"] || keys["W"]) {
+      jada.y -= jada.speed;
+      moved = true;
+    }
+  
+    if (keys["ArrowDown"] || keys["s"] || keys["S"]) {
+      jada.y += jada.speed;
+      moved = true;
+    }
+  
+    if (keys["ArrowLeft"] || keys["a"] || keys["A"]) {
+      jada.x -= jada.speed;
+      jada.facingLeft = false;
+      moved = true;
+    }
+  
+    if (keys["ArrowRight"] || keys["d"] || keys["D"]) {
+      jada.x += jada.speed;
+      jada.facingLeft = true;
+      moved = true;
+    }
+  
+    jada.x = clamp(jada.x, 0, GAME_WIDTH - jada.w);
+    jada.y = clamp(jada.y, 0, GAME_HEIGHT - jada.h);
+    jada.isMoving = moved;
+  }
+
+/*
   Main game loop.
   Updates gameplay state and redraws everything every frame.
 */
 function gameLoop(timestamp) {
-  updatePlayer();
-  updateStats(timestamp);
-  updateJada(timestamp);
-
-  drawBackground();
-  drawZones();
-  drawPlayer();
-  drawJada();
-  drawHud();
-  drawPrompt();
-  drawEndScreen();
-
-  requestAnimationFrame(gameLoop);
-}
+    updateJada();
+    updateStats(timestamp);
+  
+    drawBackground();
+    drawZones();
+    drawJada();
+    drawHud();
+    drawPrompt();
+    drawEndScreen();
+  
+    requestAnimationFrame(gameLoop);
+  }
 
 requestAnimationFrame(gameLoop);
