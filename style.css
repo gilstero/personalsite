@@ -325,3 +325,45 @@ body {
     margin-top: 12px;
     font-weight: bold;
   }
+
+  .game-header div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+
+  #focusButton.active {
+    background: #c62828;
+  }
+  
+  #focusButton.active:hover {
+    background: #d32f2f;
+  }
+
+  #focusButton {
+    background: #2e7d32;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    margin-right: 14px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  
+  #focusButton:hover {
+    background: #388e3c;
+  }
+  
+  #focusButton:active {
+    transform: translateY(1px);
+    background: #1b5e20;
+  }
+  
+  #focusButton:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(46,125,50,0.4);
+  }

@@ -341,10 +341,12 @@ focusButton.addEventListener("click", () => {
     gameFocused = !gameFocused;
   
     if (gameFocused) {
-      focusButton.textContent = "Release Game";
-    } else {
-      focusButton.textContent = "Focus Game";
-    }
+        focusButton.textContent = "Release Game";
+        focusButton.classList.add("active");
+      } else {
+        focusButton.textContent = "Focus Game";
+        focusButton.classList.remove("active");
+      }
   
   });
 
