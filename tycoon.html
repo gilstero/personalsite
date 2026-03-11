@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Experience</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <title>Sushi Tycoon</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header>
@@ -17,65 +18,29 @@
     </nav>
   </header>
 
-  <main>
-    <h1>My Experience</h1>
-
-    <section class="experience-card">
-      <h2>Work Experience</h2>
-
-      <div class="entry">
-        <h3>Tang AI Lab @ Emory University</h3>
-        <p><strong>Researcher</strong> | June 2025 – Present</p>
-        <ul>
-          <li>Designed and evaluated multi-level treatment allocation algorithms in Python.</li>
-          <li>Built experiment tooling and visualizations for policy comparison.</li>
-          <li>Analyzed runtime and performance tradeoffs across allocation methods.</li>
-        </ul>
+  <main class="game-shell">
+    <section class="game-card">
+      <div class="game-header">
+        <h1>Sushi Tycoon</h1>
+        <div class="money-display">Money: $<span id="moneyValue">0</span></div>
       </div>
 
-      <div class="entry">
-        <h3>Tillamook</h3>
-        <p><strong>Data Analytics Intern</strong> | May 2025 – Aug. 2025</p>
-        <ul>
-          <li>Improved Microsoft Fabric and Spark data pipelines.</li>
-          <li>Helped increase reporting efficiency by more than 40%.</li>
-          <li>Worked on data governance solutions with Microsoft Purview.</li>
-        </ul>
-      </div>
+      <p class="game-instructions">
+        Move with <strong>WASD</strong> or <strong>arrow keys</strong>. Stand on a machine pad and press
+        <strong>E</strong> to buy it. Each machine increases your passive income.
+      </p>
 
-      <div class="entry">
-        <h3>Youth Tech</h3>
-        <p><strong>Lead Instructor</strong> | May 2024 – Aug. 2024</p>
-        <ul>
-          <li>Taught Python, C, and Lua to students in classroom settings.</li>
-          <li>Introduced game design architecture, including game loops, event programming and state management.</li>
-          <li>Mentored students to strengthen problem-solving skills and guide development of applications and small games          </li>
-          
-        </ul>
-      </div>
-    </section>
+      <canvas id="gameCanvas" width="1000" height="620"></canvas>
 
-    <section class="experience-card">
-      <h2>Leadership</h2>
-
-      <div class="entry">
-        <h3>Emory Track & Cross Country</h3>
-        <p><strong>Student-Athlete</strong> | Aug. 2023 – Present</p>
-        <ul>
-          <li>Compete as an NCAA Division III distance runner.</li>
-          <li>Host prospective student-athletes and support recruiting visits.</li>
-          <li>Balance athletics with research, teaching, and a full academic course load.</li>
-        </ul>
-      </div>
-    </section>
-
-    <section  class="experience-card">
-      <h2>Certifications</h2>
-
-      <div class="entry">
-        <p>Currently none listed.</p>
+      <div class="legend">
+        <div><strong>Black box:</strong> your player</div>
+        <div><strong>Green pads:</strong> buyable sushi machines</div>
+        <div><strong>Colored rectangles:</strong> furniture and decor</div>
+        <div><strong>Top-left:</strong> live money + income rate</div>
       </div>
     </section>
   </main>
+
+  <script src="tycoonfuncs.js"></script>
 </body>
 </html>
