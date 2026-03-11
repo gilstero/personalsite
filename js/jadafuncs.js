@@ -2,6 +2,15 @@ const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const focusButton = document.getElementById("focusButton");
 
+const grassImage = new Image();
+grassImage.src = "assets/jadaassets/grass.png";
+
+let grassPattern = null;
+
+grassImage.onload = () => {
+  grassPattern = ctx.createPattern(grassImage, "repeat");
+};
+
 const GAME_WIDTH = canvas.width;
 const GAME_HEIGHT = canvas.height;
 
@@ -300,32 +309,20 @@ function resetGame() {
 }
 
 /*
-  Draws the room background and floor.
+  Draws the grass background using a tiled sprite.
 */
 function drawBackground() {
-  ctx.fillStyle = "#f7f3ea";
-  ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
-  ctx.fillStyle = "#d9ead3";
-  ctx.fillRect(760, 0, 240, GAME_HEIGHT);
-
-  ctx.strokeStyle = "#e0d8ca";
-  ctx.lineWidth = 1;
-
-  for (let x = 0; x <= GAME_WIDTH; x += 50) {
-    ctx.beginPath();
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x, GAME_HEIGHT);
-    ctx.stroke();
+    if (grassPattern) {
+      ctx.fillStyle = grassPattern;
+      ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+    } else {
+      // fallback color while image loads
+      ctx.fillStyle = "#7fc96a";
+      ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+    }
+  
   }
-
-  for (let y = 0; y <= GAME_HEIGHT; y += 50) {
-    ctx.beginPath();
-    ctx.moveTo(0, y);
-    ctx.lineTo(GAME_WIDTH, y);
-    ctx.stroke();
-  }
-}
 
 /*
   Draws the interaction zones like food, grooming, and walk areas.
