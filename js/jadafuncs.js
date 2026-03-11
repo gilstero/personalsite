@@ -24,6 +24,17 @@ jadaIdle.src = "assets/jadaassets/jada.png";
 const jadaMoving = new Image();
 jadaMoving.src = "assets/jadaassets/jadamoving.png";
 
+const flagImage = new Image();
+flagImage.src = "assets/jadaassets/messageflag.png";
+
+const messageFlags = [];
+const MAX_FLAGS = 3;
+const FLAG_SIZE = 42;
+
+let activeMessagePopup = null;
+let lastFlagSpawnTime = 0;
+const FLAG_SPAWN_INTERVAL = 3500;
+
 const jada = {
     x: 130,
     y: 300,
@@ -61,10 +72,31 @@ let totalCareScore = 0;
 
 const messages = [
   "I love you!",
-  "Bark Bark!",
+  "Bark bark!",
   ":)",
-  
-]
+  "Can we go outside again?",
+  "I buried this just for you.",
+  "You are my favorite human.",
+  "I could really go for a snack.",
+  "I saw a squirrel earlier.",
+  "This yard smells amazing.",
+  "I like when we play together.",
+  "Digging is one of my talents.",
+  "I hope you are having a good day.",
+  "You throw. I chase. Perfect system.",
+  "Being a dog is pretty great.",
+  "I found this message all by myself.",
+  "More water would be nice.",
+  "The grass feels good on my paws.",
+  "I am thinking about treats.",
+  "Thanks for taking care of me.",
+  "I would like one million belly rubs.",
+  "Today is a good digging day.",
+  "You are doing a great job.",
+  "I think this spot is important.",
+  "There might be treasure somewhere else too.",
+  "Woof means I appreciate you."
+];
 
 const zones = [
   {
@@ -110,6 +142,12 @@ focusButton.addEventListener("click", () => {
   }
 });
 
+window.addEventListener("click", () => {
+  if (activeMessagePopup) {
+    activeMessagePopup = null;
+  }
+});
+
 /*
   Tracks keys currently pressed and prevents page scrolling
   when the game is focused.
@@ -148,6 +186,29 @@ function clearKeys() {
   for (const key in keys) {
     keys[key] = false;
   }
+}
+
+/*
+  Draws wrapped text inside a maximum width.
+*/
+function wrapText(text, x, y, maxWidth, lineHeight) {
+  const words = text.split(" ");
+  let line = "";
+
+  for (let i = 0; i < words.length; i++) {
+    const testLine = line + words[i] + " ";
+    const metrics = ctx.measureText(testLine);
+
+    if (metrics.width > maxWidth && i > 0) {
+      ctx.fillText(line, x, y);
+      line = words[i] + " ";
+      y += lineHeight;
+    } else {
+      line = testLine;
+    }
+  }
+
+  ctx.fillText(line, x, y);
 }
 
 /*
@@ -193,7 +254,7 @@ function updateStats(timestamp) {
   stats.thirst = clamp(stats.thirst, 0, 100);
   stats.energy = clamp(stats.energy, 0, 100);
 
-  stats.happiness = clamp((stats.hunger * stats.thirst) / 100, 0, 100);
+  stats.happiness = clamp((stats.hunger + stats.thirst) / 100, 0, 100);
 
   totalCareScore += wholeSeconds;
 
@@ -219,9 +280,117 @@ function getActiveZone() {
   }
 
 /*
-  Performs the zone action when Jada presses E on a box.
+  Returns a random message from the list of possible messages.
+*/
+function getRandomMessage() {
+  const index = Math.floor(Math.random() * messages.length);
+  return messages[index];
+}
+
+/*
+  Spawns one message flag inside the middle 400x400 area.
+  The flag stays away from the outer edges and interaction areas.
+*/
+function spawnMessageFlag() {
+  if (messageFlags.length >= MAX_FLAGS) return;
+
+  const xMin = (GAME_WIDTH - 400) / 2;
+  const xMax = xMin + 400 - FLAG_SIZE;
+  const yMin = (GAME_HEIGHT - 400) / 2;
+  const yMax = yMin + 400 - FLAG_SIZE;
+
+  let attempts = 0;
+
+  while (attempts < 50) {
+    const newFlag = {
+      x: xMin + Math.random() * (xMax - xMin),
+      y: yMin + Math.random() * (yMax - yMin),
+      w: FLAG_SIZE,
+      h: FLAG_SIZE,
+      message: getRandomMessage()
+    };
+
+    let overlapsZone = false;
+    for (const zone of zones) {
+      if (rectsOverlap(newFlag, zone)) {
+        overlapsZone = true;
+        break;
+      }
+    }
+
+    let overlapsFlag = false;
+    for (const flag of messageFlags) {
+      if (rectsOverlap(newFlag, flag)) {
+        overlapsFlag = true;
+        break;
+      }
+    }
+
+    if (!overlapsZone && !overlapsFlag) {
+      messageFlags.push(newFlag);
+      return;
+    }
+
+    attempts++;
+  }
+}
+
+/*
+  Spawns flags over time until the max visible count is reached.
+*/
+function updateMessageFlags(timestamp) {
+  if (gameOver || activeMessagePopup) return;
+
+  if (!lastFlagSpawnTime) {
+    lastFlagSpawnTime = timestamp;
+  }
+
+  if (
+    messageFlags.length < MAX_FLAGS &&
+    timestamp - lastFlagSpawnTime >= FLAG_SPAWN_INTERVAL
+  ) {
+    spawnMessageFlag();
+    lastFlagSpawnTime = timestamp;
+  }
+}
+
+/*
+  Returns the message flag Jada is currently overlapping, if any.
+*/
+function getActiveMessageFlag() {
+  for (let i = 0; i < messageFlags.length; i++) {
+    if (rectsOverlap(jada, messageFlags[i])) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+/*
+  Opens the popup for a dug-up flag and removes the flag from the map.
+*/
+function digMessageFlag() {
+  const flagIndex = getActiveMessageFlag();
+  if (flagIndex === -1) return false;
+
+  const flag = messageFlags[flagIndex];
+  activeMessagePopup = flag.message;
+  messageFlags.splice(flagIndex, 1);
+  promptText = "";
+  return true;
+}
+
+/*
+  Performs interactions when Jada presses E.
+  Message flags are checked first, then normal care zones.
 */
 function interactWithZone() {
+  if (activeMessagePopup) return;
+
+  if (digMessageFlag()) {
+    return;
+  }
+
   const zone = getActiveZone();
   if (!zone) return;
 
@@ -261,6 +430,10 @@ function resetGame() {
   totalCareScore = 0;
   lastStatTick = 0;
   promptText = "";
+
+  messageFlags.length = 0;
+  activeMessagePopup = null;
+  lastFlagSpawnTime = 0;
   clearKeys();
 }
 
@@ -303,6 +476,15 @@ function drawZones() {
 
   }
 
+}
+
+/*
+  Draws all active message flags on the map.
+*/
+function drawMessageFlags() {
+  for (const flag of messageFlags) {
+    ctx.drawImage(flagImage, flag.x, flag.y, flag.w, flag.h);
+  }
 }
 
 /*
@@ -353,16 +535,19 @@ function drawStatBar(label, value, x, y, color) {
 }
 
 /*
-  Draws a context prompt when the player stands in an action area.
+  Draws a context prompt when Jada stands in an action area or flag.
 */
 function drawPrompt() {
+  if (activeMessagePopup) return;
+
+  const flagIndex = getActiveMessageFlag();
   const zone = getActiveZone();
 
-  if (zone && !gameOver) {
+  if (flagIndex !== -1 && !gameOver) {
+    promptText = "Press E to dig";
+  } else if (zone && !gameOver) {
     promptText = "Press E to use " + zone.label;
-  }
-
-  if (!zone && !gameOver && promptText.startsWith("Press E")) {
+  } else if (!gameOver) {
     promptText = "";
   }
 
@@ -378,6 +563,39 @@ function drawPrompt() {
   ctx.fillStyle = "white";
   ctx.font = "18px Arial";
   ctx.fillText(promptText, 320, 577);
+}
+
+/*
+  Draws the white popup box for a dug-up message.
+  Click anywhere to close it.
+*/
+function drawMessagePopup() {
+  if (!activeMessagePopup) return;
+
+  ctx.fillStyle = "rgba(0,0,0,0.35)";
+  ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
+  const boxX = 220;
+  const boxY = 180;
+  const boxW = 560;
+  const boxH = 180;
+
+  ctx.fillStyle = "white";
+  ctx.fillRect(boxX, boxY, boxW, boxH);
+
+  ctx.strokeStyle = "#222";
+  ctx.lineWidth = 3;
+  ctx.strokeRect(boxX, boxY, boxW, boxH);
+
+  ctx.fillStyle = "#111";
+  ctx.font = "28px Arial";
+  ctx.fillText("Jada found a message:", boxX + 30, boxY + 45);
+
+  ctx.font = "24px Arial";
+  wrapText(activeMessagePopup, boxX + 30, boxY + 90, boxW - 60, 32);
+
+  ctx.font = "18px Arial";
+  ctx.fillText("Click anywhere to close", boxX + 30, boxY + boxH - 25);
 }
 
 /*
@@ -453,17 +671,20 @@ function updateJada() {
   Updates gameplay state and redraws everything every frame.
 */
 function gameLoop(timestamp) {
-    updateJada();
-    updateStats(timestamp);
-  
-    drawBackground();
-    drawZones();
-    drawJada();
-    drawHud();
-    drawPrompt();
-    drawEndScreen();
-  
-    requestAnimationFrame(gameLoop);
-  }
+  updateJada();
+  updateStats(timestamp);
+  updateMessageFlags(timestamp);
+
+  drawBackground();
+  drawZones();
+  drawMessageFlags();
+  drawJada();
+  drawHud();
+  drawPrompt();
+  drawMessagePopup();
+  drawEndScreen();
+
+  requestAnimationFrame(gameLoop);
+}
 
 requestAnimationFrame(gameLoop);
