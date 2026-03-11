@@ -36,12 +36,22 @@ const jada = {
     facingLeft: false
   };
 
-const stats = {
-  happiness: 100,
-  hunger: 100,
-  cleanliness: 100,
-  energy: 100
-};
+  const stats = {
+    hunger: 100,
+    thirst: 100,
+    energy: 100,
+    happiness: 100
+  };
+
+// zone assets
+const drinkImage = new Image();
+drinkImage.src = "assets/jadaassets/lake.png";
+
+const eatImage = new Image();
+eatImage.src = "assets/jadaassets/food.png";
+
+const playImage = new Image();
+playImage.src = "assets/jadaassets/play.png";
 
 let gameOver = false;
 let gameWon = false;
@@ -49,7 +59,39 @@ let lastStatTick = 0;
 let promptText = "";
 let totalCareScore = 0;
 
-const zones = [];
+const messages = [
+  "I love you!",
+  "Bark Bark!",
+  ":)",
+  
+]
+
+const zones = [
+  {
+    id: "drink",
+    label: "Drink",
+    x: GAME_WIDTH - 150,
+    y: 40,
+    w: 70,
+    h: 70,
+  },
+  {
+    id: "eat",
+    label: "Eat",
+    x: GAME_WIDTH - 150,
+    y: GAME_HEIGHT - 110,
+    w: 70,
+    h: 70,
+  },
+  {
+    id: "play",
+    label: "Play",
+    x: 50,
+    y: GAME_HEIGHT - 110,
+    w: 70,
+    h: 70,
+  }
+];
 
 /*
   Toggles whether the game has focus.
@@ -129,8 +171,8 @@ function clamp(value, min, max) {
 }
 
 /*
-  Slowly lowers Jada's needs over time.
-  Happiness is influenced by the other needs.
+  Updates Jada's needs over time.
+  Happiness is computed from hunger and thirst.
 */
 function updateStats(timestamp) {
   if (gameOver) return;
@@ -144,18 +186,14 @@ function updateStats(timestamp) {
   lastStatTick += wholeSeconds * 1000;
 
   stats.hunger -= 1.0 * wholeSeconds;
-  stats.cleanliness -= 0.7 * wholeSeconds;
-  stats.energy += 1 * wholeSeconds;
-
-  const supportAverage = (stats.hunger + stats.cleanliness + stats.energy) / 3;
-  if (supportAverage < 70) stats.happiness -= 0.8 * wholeSeconds;
-  if (supportAverage < 45) stats.happiness -= 1.2 * wholeSeconds;
-  if (supportAverage > 85) stats.happiness += 0.25 * wholeSeconds;
+  stats.thirst -= 1.0 * wholeSeconds;
+  stats.energy += 1.0 * wholeSeconds;
 
   stats.hunger = clamp(stats.hunger, 0, 100);
-  stats.cleanliness = clamp(stats.cleanliness, 0, 100);
+  stats.thirst = clamp(stats.thirst, 0, 100);
   stats.energy = clamp(stats.energy, 0, 100);
-  stats.happiness = clamp(stats.happiness, 0, 100);
+
+  stats.happiness = clamp((stats.hunger * stats.thirst) / 100, 0, 100);
 
   totalCareScore += wholeSeconds;
 
@@ -181,46 +219,42 @@ function getActiveZone() {
   }
 
 /*
-  Performs the zone action when the player presses E.
+  Performs the zone action when Jada presses E on a box.
 */
 function interactWithZone() {
   const zone = getActiveZone();
   if (!zone) return;
 
-  if (zone.id === "food") {
-    stats.hunger = clamp(stats.hunger + 28, 0, 100);
-    stats.happiness = clamp(stats.happiness + 8, 0, 100);
-    promptText = "You fed Jada.";
+  if (zone.id === "drink") {
+    stats.thirst = clamp(stats.thirst + 25, 0, 100);
+    promptText = "Jada drank some water.";
   }
 
-  if (zone.id === "groom") {
-    stats.cleanliness = clamp(stats.cleanliness + 32, 0, 100);
-    stats.happiness = clamp(stats.happiness + 6, 0, 100);
-    promptText = "You groomed Jada.";
+  if (zone.id === "eat") {
+    stats.hunger = clamp(stats.hunger + 25, 0, 100);
+    promptText = "Jada ate some food.";
   }
 
-  if (zone.id === "walk") {
+  if (zone.id === "play") {
     stats.energy = clamp(stats.energy - 10, 0, 100);
-    stats.happiness = clamp(stats.happiness + 14, 0, 100);
-    stats.hunger = clamp(stats.hunger - 5, 0, 100);
-    promptText = "You took Jada on a walk.";
+    stats.hunger = clamp(stats.hunger - 4, 0, 100);
+    stats.thirst = clamp(stats.thirst - 6, 0, 100);
+    promptText = "Jada played happily.";
   }
+
+  stats.happiness = clamp((stats.hunger * stats.thirst) / 100, 0, 100);
 }
 
-/*
-  Resets the game to its initial state.
-*/
 function resetGame() {
-
   jada.x = 130;
   jada.y = 300;
   jada.isMoving = false;
   jada.facingLeft = false;
 
-  stats.happiness = 100;
   stats.hunger = 100;
-  stats.cleanliness = 100;
+  stats.thirst = 100;
   stats.energy = 100;
+  stats.happiness = 100;
 
   gameOver = false;
   gameWon = false;
@@ -247,38 +281,28 @@ function drawBackground() {
   }
 
 /*
-  Draws the interaction zones like food, grooming, and walk areas.
+  Draws the interaction zones.
+  PNG images are drawn over the zone areas.
 */
 function drawZones() {
+
   for (const zone of zones) {
-    ctx.fillStyle = zone.color;
-    ctx.fillRect(zone.x, zone.y, zone.w, zone.h);
+    let image = null;
 
-    ctx.strokeStyle = "#333";
-    ctx.lineWidth = 2;
-    ctx.strokeRect(zone.x, zone.y, zone.w, zone.h);
+    if (zone.id === "drink") image = drinkImage;
+    if (zone.id === "eat") image = eatImage;
+    if (zone.id === "play") image = playImage;
 
-    ctx.fillStyle = "#222";
-    ctx.font = "18px Arial";
-    ctx.fillText(zone.label, zone.x + 10, zone.y + 28);
-
-    if (zone.id === "food") {
-      ctx.fillStyle = "#7f6000";
-      ctx.beginPath();
-      ctx.arc(zone.x + 52, zone.y + 55, 18, 0, Math.PI * 2);
-      ctx.fill();
+    if (image) {
+      ctx.drawImage(
+        image,
+        zone.x-50,
+        zone.y-50,
+      );
     }
 
-    if (zone.id === "groom") {
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(zone.x + 25, zone.y + 48, 70, 18);
-    }
-
-    if (zone.id === "walk") {
-      ctx.fillStyle = "#6aa84f";
-      ctx.fillRect(zone.x + 18, zone.y + 38, 70, 60);
-    }
   }
+
 }
 
 /*
@@ -305,7 +329,7 @@ function drawJada() {
 function drawHud() {
   drawStatBar("Happiness", stats.happiness, 16, 16, "#ff8fb1");
   drawStatBar("Hunger", stats.hunger, 16, 52, "#f6b26b");
-  drawStatBar("Cleanliness", stats.cleanliness, 16, 88, "#6fa8dc");
+  drawStatBar("Thirst", stats.thirst, 16, 88, "#6fa8dc");
   drawStatBar("Energy", stats.energy, 16, 124, "#93c47d");
 }
 
