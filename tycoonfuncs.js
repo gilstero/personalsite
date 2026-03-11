@@ -41,53 +41,58 @@ function makeMachine(id, x, y, cost, incomeGain) {
 
 const machines = [];
 let machineId = 1;
-const startX = 180;
-const startY = 80;
-const spacingX = 145;
-const spacingY = 120;
 
 /*
-  Generates 20 machines in a 5 by 4 grid.
-  Cost increases as machine number increases.
-  Income gain also gradually increases.
+  Generates 20 machines in a 4 by 5 layout on the LEFT HALF of the canvas.
 */
+const machineStartX = 40;
+const machineStartY = 115;
+const machineSpacingX = 120;
+const machineSpacingY = 121;
+
 for (let row = 0; row < 4; row++) {
   for (let col = 0; col < 5; col++) {
     const cost = 20 + (machineId - 1) * 35;
     const incomeGain = 1 + Math.floor((machineId - 1) / 2);
+
     machines.push(
       makeMachine(
         machineId,
-        startX + col * spacingX,
-        startY + row * spacingY,
+        machineStartX + col * machineSpacingX,
+        machineStartY + row * machineSpacingY,
         cost,
         incomeGain
       )
     );
+
     machineId++;
   }
 }
 
+/*
+  Decorative furniture for the restaurant.
+  Now the RIGHT HALF contains only tables.
+*/
 const furniture = [
-  { x: 50, y: 60, w: 100, h: 70, color: "#d7b46a", type: "carpet" },
-  { x: 50, y: 450, w: 120, h: 80, color: "#c79b55", type: "carpet" },
 
-  { x: 760, y: 70, w: 80, h: 50, color: "#8b5a2b", type: "table" },
-  { x: 845, y: 70, w: 18, h: 18, color: "#5c3b1d", type: "chair" },
-  { x: 845, y: 102, w: 18, h: 18, color: "#5c3b1d", type: "chair" },
-  { x: 738, y: 70, w: 18, h: 18, color: "#5c3b1d", type: "chair" },
-  { x: 738, y: 102, w: 18, h: 18, color: "#5c3b1d", type: "chair" },
+  // sushi counter near top center
+  { x: 420, y: 28, w: 160, h: 24, color: "#c94f4f", type: "counter" },
+  { x: 447, y: 32, w: 18, h: 16, color: "#ffffff", type: "plate" },
+  { x: 477, y: 32, w: 18, h: 16, color: "#ffffff", type: "plate" },
+  { x: 507, y: 32, w: 18, h: 16, color: "#ffffff", type: "plate" },
 
-  { x: 760, y: 470, w: 90, h: 55, color: "#8b5a2b", type: "table" },
-  { x: 850, y: 478, w: 18, h: 18, color: "#5c3b1d", type: "chair" },
-  { x: 850, y: 505, w: 18, h: 18, color: "#5c3b1d", type: "chair" },
-  { x: 738, y: 478, w: 18, h: 18, color: "#5c3b1d", type: "chair" },
-  { x: 738, y: 505, w: 18, h: 18, color: "#5c3b1d", type: "chair" },
+  // right-side dining tables only
+  { x: 715, y: 100, w: 110, h: 70, color: "#8b5a2b", type: "table" },
+  { x: 855, y: 100, w: 110, h: 70, color: "#8b5a2b", type: "table" },
 
-  { x: 450, y: 20, w: 120, h: 24, color: "#c94f4f", type: "counter" },
-  { x: 455, y: 24, w: 18, h: 16, color: "#ffffff", type: "plate" },
-  { x: 485, y: 24, w: 18, h: 16, color: "#ffffff", type: "plate" },
-  { x: 515, y: 24, w: 18, h: 16, color: "#ffffff", type: "plate" }
+  { x: 715, y: 220, w: 110, h: 70, color: "#94612b", type: "table" },
+  { x: 855, y: 220, w: 110, h: 70, color: "#94612b", type: "table" },
+
+  { x: 715, y: 340, w: 110, h: 70, color: "#8b5a2b", type: "table" },
+  { x: 855, y: 340, w: 110, h: 70, color: "#8b5a2b", type: "table" },
+
+  { x: 715, y: 460, w: 110, h: 70, color: "#94612b", type: "table" },
+  { x: 855, y: 460, w: 110, h: 70, color: "#94612b", type: "table" }
 ];
 
 /*
@@ -204,15 +209,29 @@ function drawBackground() {
     ctx.lineTo(GAME_WIDTH, y);
     ctx.stroke();
   }
+
+  // visual divider between machine side and dining side
+  ctx.strokeStyle = "#bdb6aa";
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(680, 0);
+  ctx.lineTo(680, GAME_HEIGHT);
+  ctx.stroke();
 }
 
 /*
-  Draws decorative furniture such as carpets, tables, chairs, and counter pieces.
+  Draws decorative furniture such as carpets and tables.
 */
 function drawFurniture() {
   for (const item of furniture) {
     ctx.fillStyle = item.color;
     ctx.fillRect(item.x, item.y, item.w, item.h);
+
+    if (item.type === "table") {
+      ctx.strokeStyle = "#5c3b1d";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(item.x, item.y, item.w, item.h);
+    }
   }
 }
 
@@ -260,42 +279,54 @@ function drawPlayer() {
 }
 
 /*
-  Draws the canvas HUD, including current money, passive income,
-  and purchase instructions when standing on a machine.
+  Draws a smaller HUD inside the canvas.
+  Only shows passive income now since money is already shown in the page header.
 */
 function drawHud() {
-  ctx.fillStyle = "rgba(255,255,255,0.9)";
-  ctx.fillRect(12, 12, 245, 78);
+  ctx.fillStyle = "rgba(255,255,255,0.92)";
+  ctx.fillRect(12, 12, 180, 52);
 
   ctx.strokeStyle = "#222";
-  ctx.strokeRect(12, 12, 245, 78);
+  ctx.lineWidth = 2;
+  ctx.strokeRect(12, 12, 180, 52);
 
   ctx.fillStyle = "#111";
   ctx.font = "18px Arial";
-  ctx.fillText("Money: $" + Math.floor(money), 24, 38);
+  ctx.fillText("Income: $" + passiveIncomePerSecond + "/sec", 24, 44);
+}
 
+/*
+  Draws the machine purchase popup near the bottom center
+  so it does not overlap the player or clip the machine area.
+*/
+function drawPurchasePrompt() {
+  if (hoveredMachineId === null) return;
+
+  const machine = machines.find(m => m.id === hoveredMachineId);
+  if (!machine || machine.bought) return;
+
+  const boxWidth = 360;
+  const boxHeight = 60;
+  const boxX = (GAME_WIDTH - boxWidth) / 2;
+  const boxY = GAME_HEIGHT - 85;
+
+  ctx.fillStyle = "rgba(0,0,0,0.82)";
+  ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
+
+  ctx.strokeStyle = "white";
+  ctx.lineWidth = 2;
+  ctx.strokeRect(boxX, boxY, boxWidth, boxHeight);
+
+  ctx.fillStyle = "white";
   ctx.font = "16px Arial";
-  ctx.fillText("Passive income: $" + passiveIncomePerSecond + "/sec", 24, 62);
+  ctx.fillText(
+    "Press E to buy M" + machine.id + "  |  Cost: $" + machine.cost + "  |  +" + machine.incomeGain + "/sec",
+    boxX + 16,
+    boxY + 25
+  );
 
-  if (hoveredMachineId !== null) {
-    const machine = machines.find(m => m.id === hoveredMachineId);
-
-    if (machine && !machine.bought) {
-      ctx.fillStyle = "rgba(0,0,0,0.75)";
-      ctx.fillRect(300, 12, 360, 78);
-
-      ctx.fillStyle = "white";
-      ctx.font = "16px Arial";
-      ctx.fillText(
-        "Press E to buy Machine " + machine.id +
-        " | Cost: $" + machine.cost +
-        " | Gain: +$" + machine.incomeGain + "/sec",
-        314,
-        40
-      );
-      ctx.fillText("Stand on the green box to purchase it.", 314, 64);
-    }
-  }
+  ctx.font = "14px Arial";
+  ctx.fillText("Stand on the green machine pad to purchase it.", boxX + 16, boxY + 47);
 }
 
 /*
@@ -313,6 +344,7 @@ function gameLoop(timestamp) {
   drawMachines();
   drawPlayer();
   drawHud();
+  drawPurchasePrompt();
 
   requestAnimationFrame(gameLoop);
 }
