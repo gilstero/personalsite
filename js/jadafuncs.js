@@ -3,7 +3,7 @@ const ctx = canvas.getContext("2d");
 const focusButton = document.getElementById("focusButton");
 
 const grassImage = new Image();
-grassImage.src = "assets/jadaassets/grass.png";
+grassImage.src = "/assets/jadaassets/grass.png";
 
 let grassPattern = null;
 
@@ -19,13 +19,13 @@ const keys = {};
 
 // Jada sprites
 const jadaIdle = new Image();
-jadaIdle.src = "assets/jadaassets/jada.png";
+jadaIdle.src = "/assets/jadaassets/jada.png";
 
 const jadaMoving = new Image();
-jadaMoving.src = "assets/jadaassets/jadamoving.png";
+jadaMoving.src = "/assets/jadaassets/jadamoving.png";
 
 const flagImage = new Image();
-flagImage.src = "assets/jadaassets/messageflag.png";
+flagImage.src = "/assets/jadaassets/messageflag.png";
 
 const messageFlags = [];
 const MAX_FLAGS = 3;
@@ -56,13 +56,13 @@ const jada = {
 
 // zone assets
 const drinkImage = new Image();
-drinkImage.src = "assets/jadaassets/lake.png";
+drinkImage.src = "/assets/jadaassets/lake.png";
 
 const eatImage = new Image();
-eatImage.src = "assets/jadaassets/food.png";
+eatImage.src = "/assets/jadaassets/food.png";
 
 const playImage = new Image();
-playImage.src = "assets/jadaassets/play.png";
+playImage.src = "/assets/jadaassets/play.png";
 
 let gameOver = false;
 let gameWon = false;
