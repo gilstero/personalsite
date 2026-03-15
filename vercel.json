@@ -1,0 +1,30 @@
+{
+  "trailingSlash": true,
+  "redirects": [
+    {
+      "source": "/blog.html",
+      "destination": "/blog/",
+      "permanent": true
+    },
+    {
+      "source": "/experience.html",
+      "destination": "/experience/",
+      "permanent": true
+    },
+    {
+      "source": "/projects.html",
+      "destination": "/projects/",
+      "permanent": true
+    },
+    {
+      "source": "/jada.html",
+      "destination": "/jada/",
+      "permanent": true
+    },
+    {
+      "source": "/tycoon.html",
+      "destination": "/tycoon/",
+      "permanent": true
+    }
+  ]
+}
