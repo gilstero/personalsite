@@ -4,6 +4,14 @@ body {
     color: #111;
     background: #f7f7f7;
     line-height: 1.6;
+    padding: 0;
+
+    background:
+      radial-gradient(circle at top left, rgba(79, 70, 229, 0.18), transparent 32%),
+      radial-gradient(circle at top right, rgba(45, 212, 191, 0.22), transparent 28%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.74), rgba(255, 255, 255, 0.82)),
+      #f7f7f7;
+
   }
   
   body.no-scroll {
@@ -235,14 +243,31 @@ body {
     transform: translateY(-5px);
     box-shadow: 0 16px 36px rgba(0,0,0,0.14);
   }
-
+  
+  .project-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+  }
+  
+  .project-text {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .project-text h2 {
+    margin-top: 0;
+    margin-bottom: 6px;
+  }
+  
   .project-date {
     font-size: 14px;
     color: #666;
-    margin-top: -6px;
+    margin-top: 0;
     margin-bottom: 14px;
   }
-
+  
   .project-links {
     margin-top: 12px;
   }
@@ -255,6 +280,45 @@ body {
   
   .project-links a:hover {
     text-decoration: underline;
+  }
+  
+  .project-gif {
+    width: 260px;
+    height: auto; /* make it 100% of the height of the container it is in, no cap on height */
+    min-height: 180px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #ececec, #dcdcdc);
+    border: 1px solid #d6d6d6;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.04);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .project-gif::after {
+    content: "GIF Preview";
+    font-size: 14px;
+    color: #666;
+    font-weight: 500;
+  }
+  
+  .link-icon {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+    vertical-align: text-bottom;
+  }
+  
+  @media (max-width: 700px) {
+    .project-content {
+      flex-direction: column;
+    }
+  
+    .project-gif {
+      width: 100%;
+      height: 190px;
+    }
   }
 
   .link-icon {
@@ -368,13 +432,6 @@ body {
     box-shadow: 0 0 0 2px rgba(46,125,50,0.4);
   }
 
-  .thesis-buttons {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin-top: 12px;
-  }
-  
   .download-button {
     position: relative;
     display: inline-block;
@@ -385,9 +442,10 @@ body {
     font-weight: 600;
     cursor: pointer;
     border-radius: 4px;
-    z-index: 1;
+    overflow: hidden;   
   }
   
+  /* TOP LAYER */
   .download-button .docs {
     display: flex;
     align-items: center;
@@ -398,40 +456,40 @@ body {
     border-radius: 4px;
     background-color: #ffffff;
     border: solid 1px #d9d9d9;
-    transition: all 0.5s cubic-bezier(0.77, 0, 0.175, 1);
     position: relative;
-    z-index: 1;
+    z-index: 2;
+    transition: transform 0.4s ease;
   }
   
-  .download-button:hover {
-    box-shadow:
-      rgba(0, 0, 0, 0.18) 0px 12px 20px,
-      rgba(0, 0, 0, 0.08) 0px 4px 8px;
-  }
-  
+  /* BOTTOM LAYER */
   .download-button .download {
     position: absolute;
     inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    max-width: 90%;
-    margin: 0 auto;
-    z-index: -1;
-    border-radius: 4px;
-    transform: translateY(0%);
     background-color: #f5f5f5;
     border: solid 1px #e3e3e3;
-    transition: all 0.5s cubic-bezier(0.77, 0, 0.175, 1);
+    border-radius: 4px;
+    z-index: 1;
+    transform: translateY(100%);   /* start hidden BELOW */
+    transition: transform 0.4s ease;
+  }
+  
+  /* HOVER EFFECT */
+  .download-button:hover .docs {
+    transform: translateY(-100%);  /* slide OUT */
   }
   
   .download-button:hover .download {
-    transform: translateY(100%);
+    transform: translateY(0%);     /* slide IN */
   }
   
-  .download svg polyline,
-  .download svg line {
-    animation: docs 1s infinite;
+  /* SHADOW */
+  .download-button:hover {
+    box-shadow:
+      rgba(0, 0, 0, 0.18) 0px 12px 20px,
+      rgba(0, 0, 0, 0.08) 0px 4px 8px;
   }
   
   @keyframes docs {
