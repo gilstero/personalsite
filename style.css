@@ -288,6 +288,7 @@ body {
     min-height: 180px;
     flex-shrink: 0;
     border-radius: 12px;
+    overflow: hidden;
     background: linear-gradient(135deg, #ececec, #dcdcdc);
     border: 1px solid #d6d6d6;
     box-shadow: inset 0 1px 2px rgba(0,0,0,0.04);
@@ -296,11 +297,20 @@ body {
     justify-content: center;
   }
   
-  .project-gif::after {
+  .project-gif:empty::after {
     content: "GIF Preview";
     font-size: 14px;
     color: #666;
     font-weight: 500;
+  }
+
+  .project-gif img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 180px;
+    object-fit: cover;
+    border-radius: inherit;
   }
   
   .link-icon {
