@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Day 2 | Valley Sort</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <header>
+    <nav>
+      <strong>Olin Gilster</strong>
+      <div>
+        <a href="/">Home</a>
+        <a href="/experience/">Experience</a>
+        <a href="/projects/">Projects</a>
+        <a href="/blog/">Blog</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="card intro">
+      <div class="eyebrow">Day 2 of Sorting</div>
+      <h1>Valley Sort</h1>
+      <p>
+        Valley sort keeps sweeping from left to right, looking for a drop where
+        one number is larger than the number beside it. When it finds that
+        little valley, it swaps the pair and starts scanning from the beginning
+        again until the whole list rises smoothly from left to right.
+      </p>
+    </section>
+
+    <section class="card code-card">
+      <h2>Python Code</h2>
+      <pre><code># valley sort
+# find a drop between neighboring elements
+# swap the pair
+# restart the scan until no more drops are found
+
+def valleysort(lst: list) -> list:
+    sel = 0
+    while sel &lt; len(lst) - 1:
+        if lst[sel] &gt; lst[sel + 1]:
+            lst[sel], lst[sel + 1] = lst[sel + 1], lst[sel]
+            sel = 0
+        else:
+            sel += 1
+    return lst</code></pre>
+    </section>
+
+    <section class="card visualizer">
+      <div class="section-heading">
+        <div>
+          <h2>Visualization</h2>
+          <p>Enter comma-separated values and watch Valley Sort scan, swap, and restart until the list is sorted.</p>
+        </div>
+      </div>
+
+      <div class="controls">
+        <label for="values-input">Values</label>
+        <div class="input-row">
+          <input id="values-input" type="text" value="9, 4, 7, 2, 6, 1, 5">
+          <button id="run-sort" class="primary">Animate Sort</button>
+          <button id="reset" class="secondary">Reset</button>
+        </div>
+        <p id="status" class="status">Enter values and run the animation.</p>
+      </div>
+
+      <div id="chart" class="chart" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <script src="./script.js"></script>
+</body>
+</html>
