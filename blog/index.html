@@ -18,16 +18,180 @@
     </nav>
   </header>
 
-  <main>
-    <h1>Notes</h1>
-    <p>
-      I'll use this space for writing about software projects, systems programming,
-      research, and things I'm learning.
-    </p>
+  <main class="blog-main">
+    <button id="add-note-button" class="floating-add-button" type="button" aria-label="Add a note">
+      +
+    </button>
 
-    <ul>
-      <li>I'll add my thoughts when I have the time.</li>
-    </ul>
+    <section id="notes-list" class="notes-list" aria-live="polite"></section>
   </main>
+
+  <div id="modal-backdrop" class="modal-backdrop hidden"></div>
+
+  <section id="login-modal" class="modal-panel hidden" aria-hidden="true" aria-label="Admin login">
+    <button id="close-login" class="modal-close" type="button" aria-label="Close login">&times;</button>
+    <form id="login-form" class="modal-form login-form">
+      <label for="admin-password">Password</label>
+      <input id="admin-password" class="password-input" type="text" autocomplete="off" required>
+      <button class="login-arrow-button" type="submit" aria-label="Unlock">
+        &rarr;
+      </button>
+      <p id="login-status" class="modal-status"></p>
+    </form>
+  </section>
+
+  <section id="composer-modal" class="modal-panel hidden" aria-hidden="true" aria-label="Add a note">
+    <button id="close-composer" class="modal-close" type="button" aria-label="Close composer">&times;</button>
+    <form id="composer-form" class="modal-form">
+      <label for="note-title">Title</label>
+      <input id="note-title" type="text" placeholder="Note title">
+
+      <label for="note-body">Note</label>
+      <textarea id="note-body" rows="8" placeholder="Write your note..."></textarea>
+
+      <button class="save-note-button" type="submit">Add Note</button>
+    </form>
+  </section>
+
+  <script>
+    const addNoteButton = document.getElementById("add-note-button");
+    const notesList = document.getElementById("notes-list");
+    const modalBackdrop = document.getElementById("modal-backdrop");
+    const loginModal = document.getElementById("login-modal");
+    const composerModal = document.getElementById("composer-modal");
+    const closeLoginButton = document.getElementById("close-login");
+    const closeComposerButton = document.getElementById("close-composer");
+    const loginForm = document.getElementById("login-form");
+    const composerForm = document.getElementById("composer-form");
+    const adminPasswordInput = document.getElementById("admin-password");
+    const noteTitleInput = document.getElementById("note-title");
+    const noteBodyInput = document.getElementById("note-body");
+    const loginStatus = document.getElementById("login-status");
+
+    let isAuthenticated = false;
+
+    function loadNotes() {
+      const storedNotes = JSON.parse(localStorage.getItem("blog-notes") || "[]");
+      notesList.innerHTML = "";
+
+      storedNotes.forEach((note) => {
+        const noteCard = document.createElement("article");
+        noteCard.className = "note-card";
+
+        const title = document.createElement("h2");
+        title.textContent = note.title || "Untitled note";
+
+        const body = document.createElement("p");
+        body.textContent = note.body || "";
+
+        noteCard.appendChild(title);
+        noteCard.appendChild(body);
+        notesList.prepend(noteCard);
+      });
+    }
+
+    function openModal(modal) {
+      modal.classList.remove("hidden");
+      modalBackdrop.classList.remove("hidden");
+      modal.setAttribute("aria-hidden", "false");
+    }
+
+    function closeModal(modal) {
+      modal.classList.add("hidden");
+      modal.setAttribute("aria-hidden", "true");
+
+      if (loginModal.classList.contains("hidden") && composerModal.classList.contains("hidden")) {
+        modalBackdrop.classList.add("hidden");
+      }
+    }
+
+    async function checkSession() {
+      try {
+        const response = await fetch("/api/session");
+        const data = await response.json();
+        isAuthenticated = Boolean(data.authenticated);
+      } catch (error) {
+        isAuthenticated = false;
+      }
+    }
+
+    async function handleAddClick() {
+      if (!isAuthenticated) {
+        loginStatus.textContent = "";
+        adminPasswordInput.value = "";
+        openModal(loginModal);
+        adminPasswordInput.focus();
+        return;
+      }
+
+      openModal(composerModal);
+      noteTitleInput.focus();
+    }
+
+    async function handleLogin(event) {
+      event.preventDefault();
+      loginStatus.textContent = "";
+
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ password: adminPasswordInput.value })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        loginStatus.textContent = data.error || "Login failed.";
+        return;
+      }
+
+      isAuthenticated = true;
+      closeModal(loginModal);
+      openModal(composerModal);
+      noteTitleInput.focus();
+    }
+
+    function handleComposerSubmit(event) {
+      event.preventDefault();
+
+      const title = noteTitleInput.value.trim();
+      const body = noteBodyInput.value.trim();
+
+      if (!title && !body) {
+        return;
+      }
+
+      const notes = JSON.parse(localStorage.getItem("blog-notes") || "[]");
+      notes.unshift({ title, body });
+      localStorage.setItem("blog-notes", JSON.stringify(notes));
+
+      noteTitleInput.value = "";
+      noteBodyInput.value = "";
+      closeModal(composerModal);
+      loadNotes();
+    }
+
+    addNoteButton.addEventListener("click", handleAddClick);
+    loginForm.addEventListener("submit", handleLogin);
+    composerForm.addEventListener("submit", handleComposerSubmit);
+    closeLoginButton.addEventListener("click", () => closeModal(loginModal));
+    closeComposerButton.addEventListener("click", () => closeModal(composerModal));
+    modalBackdrop.addEventListener("click", () => {
+      closeModal(loginModal);
+      closeModal(composerModal);
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        closeModal(loginModal);
+        closeModal(composerModal);
+      }
+    });
+
+    loadNotes();
+    checkSession();
+  </script>
 </body>
 </html>

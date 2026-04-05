@@ -1,19 +1,16 @@
-### Olin's personal Site
+### Olin's Personal Site
 
-----
+This repository contains my personal website and a few small interactive pages
+that I use to share what I am building and learning.
 
-This website has 4 pages:
+The site currently includes:
 
-Main - About me
+- Main: a short introduction and personal homepage
+- Experience: work, research, and community involvement
+- Projects: games, experiments, and technical builds
+- Blog: a lightweight notes space for ideas and writeups
 
-Experience
-
-Projects - Games
-
-Blog
-
-----
-
+The goal of the site is to stay simple, personal, and easy to keep updating.
 
 
 

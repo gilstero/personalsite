@@ -319,6 +319,254 @@ body {
     object-fit: contain;
     vertical-align: text-bottom;
   }
+
+  .notes-shell {
+    display: grid;
+    gap: 22px;
+  }
+
+  .notes-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    background: white;
+    padding: 28px;
+    border-radius: 18px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  }
+
+  .notes-heading h1 {
+    margin-bottom: 10px;
+  }
+
+  .notes-heading p {
+    margin-bottom: 0;
+    color: #444;
+    max-width: 640px;
+  }
+
+  .add-note-button,
+  .save-note-button {
+    border: 0;
+    border-radius: 999px;
+    cursor: pointer;
+    font: inherit;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+  }
+
+  .add-note-button:hover,
+  .save-note-button:hover {
+    transform: translateY(-2px);
+  }
+
+  .add-note-button {
+    width: 52px;
+    height: 52px;
+    flex: 0 0 auto;
+    font-size: 2rem;
+    line-height: 1;
+    background: #111;
+    color: white;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.16);
+  }
+
+  .note-composer {
+    background: white;
+    padding: 24px 28px;
+    border-radius: 18px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  }
+
+  .note-composer.hidden {
+    display: none;
+  }
+
+  .note-composer label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .note-composer input,
+  .note-composer textarea {
+    width: 100%;
+    border: 1px solid #d7d7d7;
+    border-radius: 14px;
+    padding: 12px 14px;
+    font: inherit;
+    margin-bottom: 16px;
+    background: #fff;
+  }
+
+  .note-composer textarea {
+    resize: vertical;
+    min-height: 140px;
+  }
+
+  .note-actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .save-note-button {
+    background: #2563eb;
+    color: white;
+    padding: 11px 18px;
+    box-shadow: 0 10px 22px rgba(37, 99, 235, 0.2);
+  }
+
+  .notes-list {
+    display: grid;
+    gap: 18px;
+  }
+
+  .note-card {
+    background: white;
+    padding: 24px 28px;
+    border-radius: 18px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  }
+
+  .note-card h2 {
+    margin-top: 0;
+    margin-bottom: 8px;
+  }
+
+  .note-card p {
+    margin-bottom: 0;
+    color: #444;
+  }
+
+  .placeholder-note {
+    border: 1px dashed #d8d8d8;
+    background: rgba(255, 255, 255, 0.7);
+  }
+
+  .blog-main {
+    position: relative;
+    min-height: calc(100vh - 150px);
+  }
+
+  .floating-add-button {
+    position: fixed;
+    top: 92px;
+    right: max(24px, calc((100vw - 900px) / 2 + 20px));
+    width: 56px;
+    height: 56px;
+    border: 0;
+    border-radius: 999px;
+    background: #111;
+    color: white;
+    font-size: 2rem;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.16);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    z-index: 1100;
+  }
+
+  .floating-add-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 28px rgba(0, 0, 0, 0.22);
+  }
+
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.38);
+    z-index: 1400;
+  }
+
+  .modal-panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(360px, calc(100vw - 32px));
+    background: white;
+    border-radius: 20px;
+    padding: 22px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2);
+    z-index: 1500;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    border: 0;
+    background: transparent;
+    font-size: 2rem;
+    line-height: 1;
+    cursor: pointer;
+    color: #666;
+  }
+
+  .modal-form {
+    display: grid;
+    gap: 10px;
+  }
+
+  .login-form {
+    justify-items: stretch;
+    gap: 10px;
+    padding-top: 4px;
+  }
+
+  .password-input {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #d7d7d7;
+    border-radius: 14px;
+    padding: 10px 14px;
+    font: inherit;
+    background: #fff;
+  }
+
+  .login-arrow-button {
+    border: 0;
+    background: transparent;
+    color: #111;
+    font-size: 2rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    justify-self: end;
+    margin-top: 2px;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+  }
+
+  .login-arrow-button:hover {
+    transform: translateY(2px);
+    opacity: 0.8;
+  }
+
+  .modal-status {
+    margin: 0;
+    min-height: 1.4em;
+    color: #b91c1c;
+    text-align: center;
+  }
+
+  @media (max-width: 700px) {
+    .notes-heading {
+      flex-direction: column;
+    }
+
+    .add-note-button {
+      align-self: flex-end;
+    }
+
+    .floating-add-button {
+      right: 20px;
+      top: 88px;
+    }
+  }
   
   @media (max-width: 700px) {
     .project-content {
