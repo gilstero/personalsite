@@ -11,6 +11,9 @@ body {
       radial-gradient(circle at top right, rgba(45, 212, 191, 0.22), transparent 28%),
       linear-gradient(180deg, rgba(255, 255, 255, 0.74), rgba(255, 255, 255, 0.82)),
       #f7f7f7;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
 
   }
   
@@ -289,12 +292,84 @@ body {
     border-radius: 18px;
     box-shadow: 0 8px 24px rgba(0,0,0,0.08);
     margin-bottom: 28px;
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    transition:
+      transform 0.25s ease,
+      box-shadow 0.25s ease,
+      opacity 0.28s ease,
+      max-height 0.35s ease,
+      margin 0.28s ease,
+      padding 0.28s ease;
+    max-height: 900px;
+    opacity: 1;
+    overflow: hidden;
   }
   
   .project-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 16px 36px rgba(0,0,0,0.14);
+  }
+
+  .project-card.project-card-hidden {
+    opacity: 0;
+    max-height: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    pointer-events: none;
+    transform: translateY(10px) scale(0.985);
+    box-shadow: none;
+  }
+
+  .project-group {
+    transition: opacity 0.25s ease, max-height 0.35s ease, margin 0.28s ease;
+    max-height: 5000px;
+    opacity: 1;
+    overflow: hidden;
+  }
+
+  .project-group.project-group-hidden {
+    opacity: 0;
+    max-height: 0;
+    margin: 0;
+    pointer-events: none;
+  }
+
+  .project-search-panel {
+    background: white;
+    border-radius: 18px;
+    padding: 22px 24px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    margin-bottom: 14px;
+  }
+
+  .project-search-label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  .project-search-input {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #d5d8df;
+    border-radius: 14px;
+    padding: 12px 14px;
+    font: inherit;
+    background: #fbfbfc;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  }
+
+  .project-search-input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    background: white;
+  }
+
+  .project-search-status {
+    min-height: 1.4em;
+    margin: 0 0 20px;
+    color: #5c6470;
   }
   
   .project-content {

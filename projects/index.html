@@ -23,11 +23,24 @@
   </header>
 
   <main>
-    <h1>Notable Projects</h1>
+    <section class="project-search-panel">
+      <label class="project-search-label" for="project-skill-search">Search by skill</label>
+      <input
+        id="project-skill-search"
+        class="project-search-input"
+        type="search"
+        placeholder="Try HTML, Python, React, C..."
+        autocomplete="off"
+      >
+    </section>
 
+    <p id="project-search-status" class="project-search-status" aria-live="polite"></p>
+
+    <section class="project-group" data-project-group>
+      <h1>Notable Projects</h1>
 
     <!-- OGAR -->
-    <section class="project-card">
+    <section class="project-card" data-project-card data-skills="c systems programming zlib unix cli archives binary formats">
       <div class="project-content">
         <div class="project-text">
           <h2>.ogar Archive Utility</h2>
@@ -55,7 +68,7 @@
     </section>
 
     <!-- MLAUTOC -->
-    <section class="project-card">
+    <section class="project-card" data-project-card data-skills="react fastapi css typescript ts next.js nextjs api rest data visualization algorithms python web">
       <div class="project-content">
         <div class="project-text">
           <h2>MLAUTOC.com</h2>
@@ -82,7 +95,7 @@
     </section>
 
     <!-- BALL SIM -->
-    <section class="project-card">
+    <section class="project-card" data-project-card data-skills="python qt physics simulation numerical methods rendering desktop">
       <div class="project-content">
         <div class="project-text">
           <h2>Ball Physics Simulation</h2>
@@ -108,7 +121,7 @@
     </section>
 
     <!-- EAGLE EXCHANGE -->
-    <section class="project-card">
+    <section class="project-card" data-project-card data-skills="react django python tailwind axios oauth jwt marketplace web full stack">
       <div class="project-content">
         <div class="project-text">
           <h2>Eagle Exchange</h2>
@@ -134,7 +147,7 @@
     </section>
 
     <!-- REGRESSION -->
-    <section class="project-card">
+    <section class="project-card" data-project-card data-skills="react python data visualization statistics regression education web">
       <div class="project-content">
         <div class="project-text">
           <h2>Regression Visualizer Website</h2>
@@ -160,20 +173,24 @@
         </div>
       </div>
     </section>
+    </section>
 
+    <section class="project-group" data-project-group>
     <h1>Software Research Projects</h1>
 
-    <section class="project-card">
+    <section class="project-card" data-project-card data-skills="">
       <div class="project-content">
         <div class="project-text">
           <h2>Coming Soon...</h2>
         </div>
       </div>
     </section>
+    </section>
 
+    <section class="project-group" data-project-group>
     <h1>Site Accessible Games</h1>
 
-    <section class="project-card">
+    <section class="project-card" data-project-card data-skills="html css javascript js canvas game design web">
       <div class="project-content">
         <div class="project-text">
           <h2>Olin Tycoon</h2>
@@ -198,7 +215,7 @@
       </div>
     </section>
 
-    <section class="project-card">
+    <section class="project-card" data-project-card data-skills="html css javascript js canvas game design web">
       <div class="project-content">
         <div class="project-text">
           <h2>Jada Dogs</h2>
@@ -223,7 +240,64 @@
         </div>
       </div>
     </section>
+    </section>
 
   </main>
+
+  <script>
+    const projectSearchInput = document.getElementById("project-skill-search");
+    const projectSearchStatus = document.getElementById("project-search-status");
+    const projectGroups = Array.from(document.querySelectorAll("[data-project-group]"));
+    const projectCards = Array.from(document.querySelectorAll("[data-project-card]"));
+
+    function setCardVisibility(card, shouldShow) {
+      card.classList.toggle("project-card-hidden", !shouldShow);
+      card.setAttribute("aria-hidden", shouldShow ? "false" : "true");
+    }
+
+    function applyProjectFilter() {
+      const query = projectSearchInput.value.trim().toLowerCase();
+      const queryTokens = query.split(/\s+/).filter(Boolean);
+      let visibleCount = 0;
+
+      projectGroups.forEach((group) => {
+        const cards = Array.from(group.querySelectorAll("[data-project-card]"));
+        let groupHasVisibleCards = false;
+
+        cards.forEach((card) => {
+          const skillText = (card.dataset.skills || "").toLowerCase();
+          const skillTokens = skillText.split(/\s+/).filter(Boolean);
+          const shouldShow = query === "" || queryTokens.every((token) => {
+            if (token.length <= 2) {
+              return skillTokens.includes(token);
+            }
+
+            return skillText.includes(token);
+          });
+          setCardVisibility(card, shouldShow);
+
+          if (shouldShow) {
+            visibleCount += 1;
+            groupHasVisibleCards = true;
+          }
+        });
+
+        group.classList.toggle("project-group-hidden", !groupHasVisibleCards);
+      });
+
+      if (query === "") {
+        projectSearchStatus.textContent = "Showing all projects.";
+      } else if (visibleCount === 0) {
+        projectSearchStatus.textContent = `No projects matched "${query}".`;
+      } else if (visibleCount === 1) {
+        projectSearchStatus.textContent = `1 project matched "${query}".`;
+      } else {
+        projectSearchStatus.textContent = `${visibleCount} projects matched "${query}".`;
+      }
+    }
+
+    projectSearchInput.addEventListener("input", applyProjectFilter);
+    applyProjectFilter();
+  </script>
 </body>
 </html>
