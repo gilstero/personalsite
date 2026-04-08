@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Day 1 | H Sort</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <header>
+    <nav>
+      <strong>Olin Gilster</strong>
+      <div>
+        <a href="/">Home</a>
+        <a href="/experience/">Experience</a>
+        <a href="/projects/">Projects</a>
+        <a href="/blog/">Blog</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="card intro">
+      <div class="eyebrow">Day 1 of Sorting</div>
+      <h1>h Sort</h1>
+      <p>
+        h sort gives every value in a list a random hallucinated score
+        somewhere between the list minimum and maximum. It then sorts the
+        original values by those fake scores instead of their real values, so
+        the output order is random-looking rather than actually sorted.
+      </p>
+    </section>
+
+    <section class="card code-card">
+      <h2>Python Code</h2>
+      <pre><code># h sort
+# Halluciate the values of each element in the list
+# Sort by hallucianted values
+# Return the "sorted" list
+
+import random as r
+
+def h_sort(lst: list) -> list :
+    mx, mn = max(lst), min(lst)
+    halluciations = [r.random() * (mx - mn) + mn for _ in lst] # bound each value by min and max of list
+    sorted_lst = [x for _, x in sorted(zip(halluciations, lst))]
+    return sorted_lst</code></pre>
+    </section>
+
+    <section class="card visualizer">
+      <div class="section-heading">
+        <div>
+          <h2>Visualization</h2>
+          <p>Enter comma-separated values and watch the bars slowly reorder by hallucinated weights.</p>
+        </div>
+      </div>
+
+      <div class="controls">
+        <label for="values-input">Values</label>
+        <div class="input-row">
+          <input id="values-input" type="text" value="10, 2, 3, 4, 18, 7, 14">
+          <button id="run-sort" class="primary">Animate Sort</button>
+          <button id="reset" class="secondary">Reset</button>
+        </div>
+        <p id="status" class="status">Enter values and run the animation.</p>
+      </div>
+
+      <div id="chart" class="chart" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <script src="./script.js"></script>
+</body>
+</html>
