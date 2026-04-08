@@ -418,24 +418,63 @@ body {
 
   .notes-list {
     display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 280px));
     gap: 18px;
+    justify-content: center;
+    align-content: start;
+    padding: 16px 20px 40px;
   }
 
   .note-card {
+    position: relative;
+    width: 100%;
+    min-height: 260px;
     background: white;
-    padding: 24px 28px;
+    padding: 22px 24px;
     border-radius: 18px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    box-sizing: border-box;
+  }
+
+  .note-delete-button {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: #dc2626;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+  }
+
+  .note-delete-button svg {
+    width: 15px;
+    height: 15px;
+    fill: currentColor;
+  }
+
+  .note-delete-button:hover {
+    background: rgba(220, 38, 38, 0.1);
+    transform: scale(1.05);
   }
 
   .note-card h2 {
     margin-top: 0;
     margin-bottom: 8px;
+    padding-right: 24px;
   }
 
   .note-card p {
     margin-bottom: 0;
     color: #444;
+    line-height: 1.55;
   }
 
   .placeholder-note {
@@ -451,7 +490,7 @@ body {
   .floating-add-button {
     position: fixed;
     top: 92px;
-    right: max(24px, calc((100vw - 900px) / 2 + 20px));
+    right: max(12px, calc((100vw - 900px) / 2 - 8px));
     width: 56px;
     height: 56px;
     border: 0;
@@ -554,6 +593,16 @@ body {
   }
 
   @media (max-width: 700px) {
+    .notes-list {
+      grid-template-columns: minmax(0, 1fr);
+      padding-left: 12px;
+      padding-right: 12px;
+    }
+
+    .note-card {
+      min-height: 220px;
+    }
+
     .notes-heading {
       flex-direction: column;
     }
@@ -563,7 +612,7 @@ body {
     }
 
     .floating-add-button {
-      right: 20px;
+      right: 12px;
       top: 88px;
     }
   }

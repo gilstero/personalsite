@@ -70,13 +70,31 @@
 
     let isAuthenticated = false;
 
+    function createDeleteButton(index) {
+      const deleteButton = document.createElement("button");
+      deleteButton.type = "button";
+      deleteButton.className = "note-delete-button";
+      deleteButton.setAttribute("aria-label", "Delete note");
+      deleteButton.innerHTML = `
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M9 3.75h6l.75 1.5H19.5a.75.75 0 0 1 0 1.5h-15a.75.75 0 0 1 0-1.5h3.75L9 3.75Zm.75 6a.75.75 0 0 1 .75.75v6a.75.75 0 0 1-1.5 0v-6a.75.75 0 0 1 .75-.75Zm4.5 0a.75.75 0 0 1 .75.75v6a.75.75 0 0 1-1.5 0v-6a.75.75 0 0 1 .75-.75ZM7.5 8.25h9l-.72 10.13A1.5 1.5 0 0 1 14.28 19.5H9.72a1.5 1.5 0 0 1-1.5-1.12L7.5 8.25Z"/>
+        </svg>
+      `;
+      deleteButton.addEventListener("click", () => deleteNote(index));
+      return deleteButton;
+    }
+
     function loadNotes() {
       const storedNotes = JSON.parse(localStorage.getItem("blog-notes") || "[]");
       notesList.innerHTML = "";
 
-      storedNotes.forEach((note) => {
+      storedNotes.forEach((note, index) => {
         const noteCard = document.createElement("article");
         noteCard.className = "note-card";
+
+        if (isAuthenticated) {
+          noteCard.appendChild(createDeleteButton(index));
+        }
 
         const title = document.createElement("h2");
         title.textContent = note.title || "Untitled note";
@@ -88,6 +106,13 @@
         noteCard.appendChild(body);
         notesList.prepend(noteCard);
       });
+    }
+
+    function deleteNote(index) {
+      const notes = JSON.parse(localStorage.getItem("blog-notes") || "[]");
+      notes.splice(index, 1);
+      localStorage.setItem("blog-notes", JSON.stringify(notes));
+      loadNotes();
     }
 
     function openModal(modal) {
@@ -113,6 +138,8 @@
       } catch (error) {
         isAuthenticated = false;
       }
+
+      loadNotes();
     }
 
     async function handleAddClick() {
@@ -149,6 +176,7 @@
 
       isAuthenticated = true;
       closeModal(loginModal);
+      loadNotes();
       openModal(composerModal);
       noteTitleInput.focus();
     }
@@ -190,7 +218,6 @@
       }
     });
 
-    loadNotes();
     checkSession();
   </script>
 </body>
