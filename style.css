@@ -45,6 +45,32 @@ body {
   nav a:hover {
     text-decoration: underline;
   }
+
+  .site-footer-bar {
+    width: 100%;
+    background: white;
+    border-top: 1px solid #ddd;
+    margin-top: 40px;
+  }
+
+  .site-footer-inner {
+    max-width: 900px;
+    margin: auto;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 16px 20px;
+    box-sizing: border-box;
+  }
+
+  .site-footer-link {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .site-footer-link:hover {
+    text-decoration: underline;
+  }
   
   main {
     max-width: 900px;
@@ -168,6 +194,12 @@ body {
   @media (max-width: 700px) {
     .profile {
       flex-direction: column;
+      text-align: center;
+    }
+
+    .site-footer-inner {
+      flex-direction: column;
+      gap: 8px;
       text-align: center;
     }
   
