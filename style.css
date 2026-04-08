@@ -17,6 +17,10 @@ body {
   body.no-scroll {
     overflow: hidden;
   }
+
+  body.not-found-page {
+    background: #f7f7f7;
+  }
   
   header {
     position: fixed;
