@@ -23,8 +23,7 @@
     <section class="game-card">
       <div class="game-header">
         <h1>Sushi Tycoon</h1>
-        <button id="focusButton">Focus Game</button>
-        <div class="money-display">Money: $<span id="moneyValue">0</span></div>
+        <button id="focusButton">Start Game</button>
       </div>
 
       <p class="game-instructions">
@@ -32,17 +31,11 @@
         <strong>E</strong> to buy it. Machines are on the left side, and the restaurant tables are on the right.
       </p>
 
+      <span id="moneyValue" hidden aria-hidden="true">0</span>
       <canvas id="gameCanvas" width="1000" height="620"></canvas>
-
-      <div class="legend">
-        <div><strong>Black box:</strong> You :)</div>
-        <div><strong>Green pads:</strong> Buyable sushi machines</div>
-        <div><strong>Colored rectangles:</strong> Tables </div>
-        <div><strong>Top-left:</strong> Live income rate </div>
-      </div>
     </section>
   </main>
 
-  <script src="/js/tycoonfuncs.js"></script>
+  <script src="/js/tycoonfuncs.js?v=2"></script>
 </body>
 </html>

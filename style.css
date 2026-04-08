@@ -663,7 +663,10 @@ body {
 
   .game-instructions {
     color: #444;
-    margin-bottom: 14px;
+    width: 100%;
+    max-width: 1000px;
+    box-sizing: border-box;
+    margin: 0 auto 14px;
     line-height: 1.5;
   }
 

@@ -1,23 +1,41 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
-const moneyValue = document.getElementById("moneyValue");
 
 const GAME_WIDTH = canvas.width;
 const GAME_HEIGHT = canvas.height;
+const WIN_GOAL = 10000;
+
+ctx.imageSmoothingEnabled = false;
+
+const playerSprite = new Image();
+playerSprite.src = "/assets/tycoonassets/sprite.png";
+
+const tableSprite = new Image();
+tableSprite.src = "/assets/tycoonassets/table.png";
+
+const buyMachineSprite = new Image();
+buyMachineSprite.src = "/assets/tycoonassets/buymachine.png";
+
+const boughtMachineSprite = new Image();
+boughtMachineSprite.src = "/assets/tycoonassets/boughtmachine.png";
 
 const player = {
   x: 80,
-  y: 300,
-  w: 22,
-  h: 22,
+  y: 286,
+  w: 46,
+  h: 60,
   speed: 3.2,
   color: "black"
 };
 
 let money = 0;
 let passiveIncomePerSecond = 1;
-let lastIncomeTime = 0;
+let nextBaseIncomeTime = 0;
 let hoveredMachineId = null;
+let playerFacing = "right";
+let winBannerUntil = 0;
+let currentTimestamp = 0;
+const floatingIncomeTexts = [];
 
 const keys = {};
 
@@ -38,6 +56,7 @@ function makeMachine(id, x, y, cost, incomeGain) {
     cost,
     incomeGain,
     bought: false,
+    nextPayoutTime: 0,
     label: "M" + id
   };
 }
@@ -74,28 +93,21 @@ for (let row = 0; row < 4; row++) {
 
 /*
   Decorative furniture for the restaurant.
-  Now the RIGHT HALF contains only tables.
+  The right half uses the uploaded table art.
 */
 const furniture = [
 
-  // sushi counter near top center
-  { x: 420, y: 28, w: 160, h: 24, color: "#c94f4f", type: "counter" },
-  { x: 447, y: 32, w: 18, h: 16, color: "#ffffff", type: "plate" },
-  { x: 477, y: 32, w: 18, h: 16, color: "#ffffff", type: "plate" },
-  { x: 507, y: 32, w: 18, h: 16, color: "#ffffff", type: "plate" },
+  { x: 708, y: 72, w: 120, h: 120, color: "#8b5a2b", type: "table" },
+  { x: 850, y: 72, w: 120, h: 120, color: "#8b5a2b", type: "table" },
 
-  // right-side dining tables only
-  { x: 715, y: 100, w: 110, h: 70, color: "#8b5a2b", type: "table" },
-  { x: 855, y: 100, w: 110, h: 70, color: "#8b5a2b", type: "table" },
+  { x: 708, y: 210, w: 120, h: 120, color: "#94612b", type: "table" },
+  { x: 850, y: 210, w: 120, h: 120, color: "#94612b", type: "table" },
 
-  { x: 715, y: 220, w: 110, h: 70, color: "#94612b", type: "table" },
-  { x: 855, y: 220, w: 110, h: 70, color: "#94612b", type: "table" },
+  { x: 708, y: 348, w: 120, h: 120, color: "#8b5a2b", type: "table" },
+  { x: 850, y: 348, w: 120, h: 120, color: "#8b5a2b", type: "table" },
 
-  { x: 715, y: 340, w: 110, h: 70, color: "#8b5a2b", type: "table" },
-  { x: 855, y: 340, w: 110, h: 70, color: "#8b5a2b", type: "table" },
-
-  { x: 715, y: 460, w: 110, h: 70, color: "#94612b", type: "table" },
-  { x: 855, y: 460, w: 110, h: 70, color: "#94612b", type: "table" }
+  { x: 708, y: 486, w: 120, h: 120, color: "#94612b", type: "table" },
+  { x: 850, y: 486, w: 120, h: 120, color: "#94612b", type: "table" }
 ];
 
 /*
@@ -128,23 +140,49 @@ function clampPlayer() {
 function updatePlayer() {
   if (keys["ArrowUp"] || keys["w"] || keys["W"]) player.y -= player.speed;
   if (keys["ArrowDown"] || keys["s"] || keys["S"]) player.y += player.speed;
-  if (keys["ArrowLeft"] || keys["a"] || keys["A"]) player.x -= player.speed;
-  if (keys["ArrowRight"] || keys["d"] || keys["D"]) player.x += player.speed;
+
+  if (keys["ArrowLeft"] || keys["a"] || keys["A"]) {
+    player.x -= player.speed;
+    playerFacing = "left";
+  }
+
+  if (keys["ArrowRight"] || keys["d"] || keys["D"]) {
+    player.x += player.speed;
+    playerFacing = "right";
+  }
 
   clampPlayer();
 }
 
 /*
-  Adds passive income once per second based on the current income rate.
-  Uses the animation timestamp to stay consistent over time.
+  Pays out each income source on its own 1-second cycle.
+  New machines begin paying one second after they are bought.
 */
 function updateIncome(timestamp) {
-  if (!lastIncomeTime) lastIncomeTime = timestamp;
+  if (!nextBaseIncomeTime) {
+    nextBaseIncomeTime = timestamp + 1000;
+  }
 
-  if (timestamp - lastIncomeTime >= 1000) {
-    const secondsPassed = Math.floor((timestamp - lastIncomeTime) / 1000);
-    money += passiveIncomePerSecond * secondsPassed;
-    lastIncomeTime += secondsPassed * 1000;
+  let earnedMoney = false;
+
+  while (timestamp >= nextBaseIncomeTime) {
+    money += 1;
+    nextBaseIncomeTime += 1000;
+    earnedMoney = true;
+  }
+
+  for (const machine of machines) {
+    if (!machine.bought || !machine.nextPayoutTime) continue;
+
+    while (timestamp >= machine.nextPayoutTime) {
+      money += 1;
+      machine.nextPayoutTime += 1000 / machine.incomeGain;
+      spawnFloatingIncome(machine);
+      earnedMoney = true;
+    }
+  }
+
+  if (earnedMoney) {
     updateMoneyDisplay();
   }
 }
@@ -171,22 +209,83 @@ function updateHoveredMachine() {
 function buyHoveredMachine() {
   if (hoveredMachineId === null) return;
 
-  const machine = machines.find(m => m.id === hoveredMachineId);
+  const machine = machines.find((m) => m.id === hoveredMachineId);
   if (!machine || machine.bought) return;
 
   if (money >= machine.cost) {
     money -= machine.cost;
     machine.bought = true;
+    machine.nextPayoutTime = currentTimestamp + 1000 / machine.incomeGain;
     passiveIncomePerSecond += machine.incomeGain;
     updateMoneyDisplay();
   }
 }
 
 /*
-  Updates the money value displayed in the top HTML counter.
+  Keeps money rounded cleanly for display inside the canvas HUD.
 */
 function updateMoneyDisplay() {
-  moneyValue.textContent = Math.floor(money);
+  money = Math.max(0, Math.floor(money * 100) / 100);
+}
+
+/*
+  Creates a floating +1 marker at the bin below a bought machine.
+*/
+function spawnFloatingIncome(machine) {
+  floatingIncomeTexts.push({
+    x: machine.x + machine.w / 2,
+    y: machine.y + machine.h + 22,
+    createdAt: currentTimestamp,
+    duration: 650
+  });
+}
+
+/*
+  Updates and expires floating income markers.
+*/
+function updateFloatingIncomeTexts(timestamp) {
+  for (let i = floatingIncomeTexts.length - 1; i >= 0; i--) {
+    const text = floatingIncomeTexts[i];
+    if (timestamp - text.createdAt > text.duration) {
+      floatingIncomeTexts.splice(i, 1);
+    }
+  }
+}
+
+/*
+  Resets the tycoon run after reaching the win goal.
+*/
+function resetGame() {
+  money = 0;
+  passiveIncomePerSecond = 1;
+  nextBaseIncomeTime = currentTimestamp ? currentTimestamp + 1000 : 0;
+  hoveredMachineId = null;
+  player.x = 80;
+  player.y = 286;
+  playerFacing = "right";
+
+  for (const machine of machines) {
+    machine.bought = false;
+    machine.nextPayoutTime = 0;
+  }
+
+  floatingIncomeTexts.length = 0;
+
+  Object.keys(keys).forEach((key) => {
+    keys[key] = false;
+  });
+
+  updateMoneyDisplay();
+}
+
+/*
+  Ends the run when the player reaches the money goal.
+*/
+function checkWin(timestamp) {
+  if (money < WIN_GOAL) return;
+
+  winBannerUntil = timestamp + 1800;
+  resetGame();
 }
 
 /*
@@ -213,7 +312,6 @@ function drawBackground() {
     ctx.stroke();
   }
 
-  // visual divider between machine side and dining side
   ctx.strokeStyle = "#bdb6aa";
   ctx.lineWidth = 3;
   ctx.beginPath();
@@ -223,10 +321,16 @@ function drawBackground() {
 }
 
 /*
-  Draws decorative furniture such as carpets and tables.
+  Draws decorative furniture such as the sushi counter and dining tables.
+  Tables use the uploaded sprite with a simple rectangle fallback.
 */
 function drawFurniture() {
   for (const item of furniture) {
+    if (item.type === "table" && tableSprite.complete && tableSprite.naturalWidth > 0) {
+      ctx.drawImage(tableSprite, item.x, item.y, item.w, item.h);
+      continue;
+    }
+
     ctx.fillStyle = item.color;
     ctx.fillRect(item.x, item.y, item.w, item.h);
 
@@ -240,62 +344,200 @@ function drawFurniture() {
 
 /*
   Draws all machine pads.
-  Unbought machines show cost and income gain.
+  Unbought machines use the uploaded buy-machine art with only the machine number shown.
   Bought machines change appearance to show they are active.
 */
 function drawMachines() {
   for (const machine of machines) {
     if (machine.bought) {
-      ctx.fillStyle = "#4caf50";
-      ctx.fillRect(machine.x, machine.y, machine.w, machine.h);
+      if (boughtMachineSprite.complete && boughtMachineSprite.naturalWidth > 0) {
+        ctx.drawImage(boughtMachineSprite, machine.x, machine.y, machine.w, machine.h);
+      } else {
+        ctx.fillStyle = "#4caf50";
+        ctx.fillRect(machine.x, machine.y, machine.w, machine.h);
 
-      ctx.fillStyle = "#1b5e20";
-      ctx.fillRect(machine.x + 10, machine.y + 10, 36, 12);
-      ctx.fillRect(machine.x + 12, machine.y + 28, 32, 16);
+        ctx.fillStyle = "#1b5e20";
+        ctx.fillRect(machine.x + 10, machine.y + 10, 36, 12);
+        ctx.fillRect(machine.x + 12, machine.y + 28, 32, 16);
+      }
 
-      ctx.fillStyle = "white";
-      ctx.font = "12px Arial";
-      ctx.fillText("+$" + machine.incomeGain + "/s", machine.x + 7, machine.y + 52);
+      drawCollectionBin(machine);
+
     } else {
-      ctx.fillStyle = hoveredMachineId === machine.id ? "#90ee90" : "#b7f0b1";
-      ctx.fillRect(machine.x, machine.y, machine.w, machine.h);
+      if (buyMachineSprite.complete && buyMachineSprite.naturalWidth > 0) {
+        ctx.drawImage(buyMachineSprite, machine.x, machine.y, machine.w, machine.h);
+      } else {
+        ctx.fillStyle = hoveredMachineId === machine.id ? "#90ee90" : "#b7f0b1";
+        ctx.fillRect(machine.x, machine.y, machine.w, machine.h);
+      }
 
       ctx.strokeStyle = "#2e7d32";
       ctx.lineWidth = 2;
       ctx.strokeRect(machine.x, machine.y, machine.w, machine.h);
 
+      if (hoveredMachineId === machine.id) {
+        ctx.fillStyle = "rgba(255, 255, 255, 0.16)";
+        ctx.fillRect(machine.x, machine.y, machine.w, machine.h);
+      }
+
       ctx.fillStyle = "#1f1f1f";
-      ctx.font = "12px Arial";
-      ctx.fillText(machine.label, machine.x + 16, machine.y + 18);
-      ctx.fillText("$" + machine.cost, machine.x + 10, machine.y + 34);
-      ctx.fillText("+" + machine.incomeGain + "/s", machine.x + 6, machine.y + 49);
+      ctx.font = "bold 15px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText(machine.label, machine.x + machine.w / 2, machine.y + 20);
+      ctx.textAlign = "start";
     }
   }
 }
 
 /*
-  Draws the player as a simple black square.
+  Draws the collection bin directly south of a bought machine.
+*/
+function drawCollectionBin(machine) {
+  const binWidth = 26;
+  const binHeight = 18;
+  const binX = machine.x + (machine.w - binWidth) / 2;
+  const binY = machine.y + machine.h + 8;
+
+  ctx.fillStyle = "#5f6779";
+  ctx.fillRect(binX, binY, binWidth, binHeight);
+
+  ctx.strokeStyle = "#1f2430";
+  ctx.lineWidth = 2;
+  ctx.strokeRect(binX, binY, binWidth, binHeight);
+
+  ctx.fillStyle = "#8a93a8";
+  ctx.fillRect(binX + 4, binY + 4, binWidth - 8, binHeight - 8);
+}
+
+/*
+  Draws floating +1 markers that rise out of the collection bins.
+*/
+function drawFloatingIncomeTexts(timestamp) {
+  ctx.save();
+  ctx.textAlign = "center";
+  ctx.font = "bold 16px Arial";
+
+  for (const text of floatingIncomeTexts) {
+    const progress = Math.min((timestamp - text.createdAt) / text.duration, 1);
+    const rise = 22 * progress;
+    const alpha = 1 - progress;
+
+    ctx.fillStyle = `rgba(34, 139, 34, ${alpha})`;
+    ctx.fillText("+1", text.x, text.y - rise);
+  }
+
+  ctx.restore();
+}
+
+/*
+  Draws the player using the uploaded sprite with a square fallback.
 */
 function drawPlayer() {
+  if (playerSprite.complete && playerSprite.naturalWidth > 0) {
+    ctx.save();
+
+    if (playerFacing === "left") {
+      ctx.translate(player.x + player.w, player.y);
+      ctx.scale(-1, 1);
+      ctx.drawImage(playerSprite, 0, 0, player.w, player.h);
+    } else {
+      ctx.drawImage(playerSprite, player.x, player.y, player.w, player.h);
+    }
+
+    ctx.restore();
+    return;
+  }
+
   ctx.fillStyle = player.color;
   ctx.fillRect(player.x, player.y, player.w, player.h);
 }
 
 /*
-  Draws a smaller HUD inside the canvas.
-  Only shows passive income now since money is already shown in the page header.
+  Draws a single HUD box inside the canvas for both money and income rate.
 */
 function drawHud() {
-  ctx.fillStyle = "rgba(255,255,255,0.92)";
-  ctx.fillRect(12, 12, 180, 52);
+  const hudX = 12;
+  const hudY = 12;
+  const hudW = 240;
+  const hudH = 74;
+
+  ctx.fillStyle = "rgba(255,255,255,0.94)";
+  ctx.fillRect(hudX, hudY, hudW, hudH);
 
   ctx.strokeStyle = "#222";
   ctx.lineWidth = 2;
-  ctx.strokeRect(12, 12, 180, 52);
+  ctx.strokeRect(hudX, hudY, hudW, hudH);
 
   ctx.fillStyle = "#111";
-  ctx.font = "18px Arial";
-  ctx.fillText("Income: $" + passiveIncomePerSecond + "/sec", 24, 44);
+  ctx.font = "bold 20px Arial";
+  ctx.fillText("Money: $" + Math.floor(money), hudX + 14, hudY + 30);
+
+  ctx.font = "16px Arial";
+  ctx.fillText("Rate: $" + passiveIncomePerSecond + "/sec", hudX + 14, hudY + 56);
+}
+
+/*
+  Draws a goal progress bar in the top-right corner of the canvas.
+*/
+function drawGoalProgress() {
+  const boxW = 240;
+  const boxH = 74;
+  const boxX = GAME_WIDTH - boxW - 12;
+  const boxY = 12;
+  const progress = Math.min(money / WIN_GOAL, 1);
+  const percent = Math.floor(progress * 100);
+
+  ctx.fillStyle = "rgba(255,255,255,0.94)";
+  ctx.fillRect(boxX, boxY, boxW, boxH);
+
+  ctx.strokeStyle = "#222";
+  ctx.lineWidth = 2;
+  ctx.strokeRect(boxX, boxY, boxW, boxH);
+
+  ctx.fillStyle = "#111";
+  ctx.font = "bold 18px Arial";
+  ctx.fillText("Goal: $10,000", boxX + 14, boxY + 24);
+
+  ctx.fillStyle = "#dde6d7";
+  ctx.fillRect(boxX + 14, boxY + 30, boxW - 28, 16);
+
+  ctx.fillStyle = "#4caf50";
+  ctx.fillRect(boxX + 14, boxY + 30, (boxW - 28) * progress, 16);
+
+  ctx.strokeStyle = "#1f1f1f";
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(boxX + 14, boxY + 30, boxW - 28, 16);
+
+  ctx.fillStyle = "#111";
+  ctx.font = "15px Arial";
+  ctx.fillText(percent + "% complete", boxX + 14, boxY + 66);
+}
+
+/*
+  Briefly shows a win message after the player hits the goal.
+*/
+function drawWinBanner(timestamp) {
+  if (timestamp >= winBannerUntil) return;
+
+  const boxWidth = 320;
+  const boxHeight = 72;
+  const boxX = (GAME_WIDTH - boxWidth) / 2;
+  const boxY = 96;
+
+  ctx.fillStyle = "rgba(0, 0, 0, 0.84)";
+  ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
+
+  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = 2;
+  ctx.strokeRect(boxX, boxY, boxWidth, boxHeight);
+
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "bold 24px Arial";
+  ctx.textAlign = "center";
+  ctx.fillText("You hit $10,000!", boxX + boxWidth / 2, boxY + 30);
+  ctx.font = "16px Arial";
+  ctx.fillText("Starting a new run...", boxX + boxWidth / 2, boxY + 54);
+  ctx.textAlign = "start";
 }
 
 /*
@@ -305,7 +547,7 @@ function drawHud() {
 function drawPurchasePrompt() {
   if (hoveredMachineId === null) return;
 
-  const machine = machines.find(m => m.id === hoveredMachineId);
+  const machine = machines.find((m) => m.id === hoveredMachineId);
   if (!machine || machine.bought) return;
 
   const boxWidth = 360;
@@ -337,75 +579,32 @@ function drawPurchasePrompt() {
   When focused, movement keys will not scroll the page.
 */
 focusButton.addEventListener("click", () => {
+  gameFocused = !gameFocused;
 
-    gameFocused = !gameFocused;
-  
-    if (gameFocused) {
-        focusButton.textContent = "Release Game";
-        focusButton.classList.add("active");
-      } else {
-        focusButton.textContent = "Focus Game";
-        focusButton.classList.remove("active");
-      }
-  
-  });
+  if (gameFocused) {
+    focusButton.textContent = "End Game";
+    focusButton.classList.add("active");
+  } else {
+    focusButton.textContent = "Start Game";
+    focusButton.classList.remove("active");
 
-  /*
+    Object.keys(keys).forEach((key) => {
+      keys[key] = false;
+    });
+  }
+});
+
+/*
   Tracks key presses and allows machine purchasing with E.
   Prevents page scrolling when the game is focused.
 */
 window.addEventListener("keydown", (e) => {
+  if (!gameFocused) return;
 
-    if (!gameFocused) return;
-  
-    if (
-      ["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"," "].includes(e.key)
-    ) {
-      e.preventDefault();
-    }
-  
-    keys[e.key] = true;
-  
-    if (e.key === "e" || e.key === "E") {
-      buyHoveredMachine();
-    }
-  });
-  
-  /*
-    Removes keys from the active key list when released.
-  */
-  window.addEventListener("keyup", (e) => {
-  
-    if (!gameFocused) return;
-  
-    keys[e.key] = false;
-  
-  });
+  if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "].includes(e.key)) {
+    e.preventDefault();
+  }
 
-/*
-  Main game loop.
-  Updates movement, income, hovered machine detection,
-  and redraws the entire scene every animation frame.
-*/
-function gameLoop(timestamp) {
-  updatePlayer();
-  updateIncome(timestamp);
-  updateHoveredMachine();
-
-  drawBackground();
-  drawFurniture();
-  drawMachines();
-  drawPlayer();
-  drawHud();
-  drawPurchasePrompt();
-
-  requestAnimationFrame(gameLoop);
-}
-
-/*
-  Tracks key presses and allows machine purchasing with E.
-*/
-window.addEventListener("keydown", (e) => {
   keys[e.key] = true;
 
   if (e.key === "e" || e.key === "E") {
@@ -417,8 +616,36 @@ window.addEventListener("keydown", (e) => {
   Removes keys from the active key list when released.
 */
 window.addEventListener("keyup", (e) => {
+  if (!gameFocused) return;
+
   keys[e.key] = false;
 });
+
+/*
+  Main game loop.
+  Updates movement, income, hovered machine detection,
+  and redraws the entire scene every animation frame.
+*/
+function gameLoop(timestamp) {
+  currentTimestamp = timestamp;
+  updatePlayer();
+  updateIncome(timestamp);
+  updateFloatingIncomeTexts(timestamp);
+  updateHoveredMachine();
+  checkWin(timestamp);
+
+  drawBackground();
+  drawFurniture();
+  drawMachines();
+  drawFloatingIncomeTexts(timestamp);
+  drawPlayer();
+  drawHud();
+  drawGoalProgress();
+  drawPurchasePrompt();
+  drawWinBanner(timestamp);
+
+  requestAnimationFrame(gameLoop);
+}
 
 updateMoneyDisplay();
 requestAnimationFrame(gameLoop);
