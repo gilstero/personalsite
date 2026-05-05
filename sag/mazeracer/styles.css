@@ -1,0 +1,277 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    background: white;
+    color: #222;
+    overflow: hidden;
+}
+
+.main-screen {
+    display: flex;
+    width: 100%;
+    height: 100vh;
+}
+
+/* LEFT PANEL */
+.left-panel {
+    width: 280px;
+    padding: 16px;
+    border-right: 1px solid #d8d8d8;
+    overflow: hidden;
+    background: white;
+}
+
+.left-panel h1 {
+    font-size: 22px;
+    margin-bottom: 14px;
+    font-weight: 600;
+}
+
+.section {
+    margin-bottom: 12px;
+}
+
+.section label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 5px;
+    color: #666;
+}
+
+.section input {
+    width: 100%;
+    padding: 7px 8px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-size: 14px;
+    font-family: inherit;
+}
+
+.section input:focus {
+    outline: none;
+    border-color: #333;
+}
+
+/* COLOR GRID */
+.color-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 18px);
+    gap: 5px;
+}
+
+.color-btn {
+    width: 18px;
+    height: 18px;
+    border: 2px solid transparent;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.color-btn:hover {
+    border-color: #333;
+}
+
+.color-btn.active {
+    border-color: #333;
+    box-shadow: 0 0 0 1px #333;
+}
+
+/* BUTTONS */
+.button-group {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+}
+
+.btn {
+    padding: 7px 10px;
+    background: white;
+    border: 1px solid #ccc;
+    color: #333;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+}
+
+.btn:hover {
+    border-color: #333;
+    background: #f5f5f5;
+}
+
+.btn.active {
+    background: #333;
+    color: white;
+    border-color: #333;
+}
+
+.play-btn {
+    width: 100%;
+    padding: 9px;
+    background: #333;
+    color: white;
+    border-color: #333;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.play-btn:hover {
+    background: #444;
+}
+
+.back-btn {
+    width: 100%;
+    padding: 8px;
+    font-size: 13px;
+    margin-top: 4px;
+}
+
+.status {
+    margin-top: 8px;
+    padding: 8px;
+    background: white;
+    border: 1px solid #eee;
+    border-radius: 3px;
+    font-size: 12px;
+    text-align: center;
+    color: #666;
+    min-height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.choices {
+    display: grid;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.choice-row {
+    display: grid;
+    grid-template-columns: 14px 1fr auto auto;
+    gap: 8px;
+    align-items: center;
+    padding: 7px 8px;
+    border: 1px solid #e7e7e7;
+    border-radius: 3px;
+    font-size: 12px;
+    color: #333;
+}
+
+.color-dot {
+    width: 12px;
+    height: 12px;
+    border: 1px solid #333;
+    border-radius: 50%;
+}
+
+/* RIGHT PANEL */
+.right-panel {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    position: relative;
+}
+
+#gameCanvas {
+    width: min(72vw, 72vh);
+    height: min(72vw, 72vh);
+    max-width: calc(100vw - 320px);
+    max-height: calc(100vh - 32px);
+    border: 1px solid #ddd;
+    background: white;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+
+.game-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+
+.game-over-content {
+    text-align: center;
+}
+
+.game-over-content h2 {
+    font-size: 24px;
+    margin-bottom: 8px;
+}
+
+.game-over-content p {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+.game-over-content .btn {
+    padding: 10px 20px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 1024px) {
+    .left-panel {
+        width: 250px;
+    }
+    
+    .left-panel h1 {
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .main-screen {
+        flex-direction: column;
+    }
+    
+    .left-panel {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #ddd;
+        max-height: 46%;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 10px;
+        padding: 15px;
+        overflow: auto;
+    }
+    
+    .right-panel {
+        flex: 1;
+        max-height: 54%;
+    }
+
+    #gameCanvas {
+        width: min(90vw, 48vh);
+        height: min(90vw, 48vh);
+        max-width: 90vw;
+        max-height: 48vh;
+    }
+}

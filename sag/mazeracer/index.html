@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maze Racer</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="mainScreen" class="main-screen">
+        <!-- LEFT PANEL - SELECTIONS -->
+        <div class="left-panel">
+            <h1>Maze Racer</h1>
+            
+            <div class="section">
+                <label>Name</label>
+                <input type="text" id="playerName" placeholder="Enter name" maxlength="15" value="Player">
+            </div>
+            
+            <div class="section">
+                <label>Color</label>
+                <div class="color-grid" id="colorGrid"></div>
+            </div>
+            
+            <div class="section">
+                <label>Size</label>
+                <div class="button-group">
+                    <button class="btn size-btn" data-size="small">Small</button>
+                    <button class="btn size-btn active" data-size="medium">Medium</button>
+                    <button class="btn size-btn" data-size="large">Large</button>
+                </div>
+            </div>
+            
+            <div class="section">
+                <label>Design</label>
+                <div class="button-group">
+                    <button class="btn shape-btn" data-shape="square">Square</button>
+                    <button class="btn shape-btn" data-shape="triangle">Triangle</button>
+                    <button class="btn shape-btn" data-shape="circle">Circle</button>
+                </div>
+            </div>
+            
+            <div class="section">
+                <button id="playBtn" class="btn play-btn">Ready</button>
+                <button id="backBtn" class="btn back-btn" style="display: none;">Back</button>
+            </div>
+            
+            <div id="choices" class="choices"></div>
+            <div id="status" class="status"></div>
+        </div>
+        
+        <!-- RIGHT PANEL - MAZE -->
+        <div class="right-panel">
+            <canvas id="gameCanvas"></canvas>
+            <div id="gameOverlay" class="game-overlay" style="display: none;">
+                <div class="game-over-content">
+                    <h2 id="resultText"></h2>
+                    <p id="timeText"></p>
+                    <button id="playAgainBtn" class="btn">Play Again</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script>
+        window.MAZE_RACER_SERVER_URL = '';
+    </script>
+    <script src="network.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>

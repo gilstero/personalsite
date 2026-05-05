@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>Projects</title>
   <link rel="stylesheet" href="/style.css">
@@ -9,6 +10,7 @@
   <link rel="prefetch" href="/projects/">
   <link rel="prefetch" href="/blog/">
 </head>
+
 <body>
   <header>
     <nav>
@@ -25,13 +27,8 @@
   <main>
     <section class="project-search-panel">
       <label class="project-search-label" for="project-skill-search">Search by skill</label>
-      <input
-        id="project-skill-search"
-        class="project-search-input"
-        type="search"
-        placeholder="Try HTML, Python, React, C..."
-        autocomplete="off"
-      >
+      <input id="project-skill-search" class="project-search-input" type="search"
+        placeholder="Try HTML, Python, React, C..." autocomplete="off">
     </section>
 
     <p id="project-search-status" class="project-search-status" aria-live="polite"></p>
@@ -39,209 +36,264 @@
     <section class="project-group" data-project-group>
       <h1>Notable Projects</h1>
 
-    <!-- OGAR -->
-    <section class="project-card" data-project-card data-skills="c systems programming zlib unix cli archives binary formats">
-      <div class="project-content">
-        <div class="project-text">
-          <h2>.ogar Archive Utility</h2>
-          <p class="project-date">Spring 2026</p>
+      <!-- Sscraper -->
+      <section class="project-card" data-project-card
+        data-skills="python selenium web scraping automation NLP javascript RESTful APIs">
+        <div class="project-content">
+          <div class="project-text">
+            <h2>"Sscaper" a locked Sharepoint file converter</h2>
+              <p class="project-date">Summer 2026</p>
 
-          <p>
-            <code>.ogar</code> is a custom archive framework written in C inspired by the
-            Unix <code>ar</code> utility. The project explores systems programming through
-            the design of a binary archive format with append-friendly records, explicit
-            table-of-contents indexing, rich metadata preservation, and optional
-            per-file compression using zlib.
-          </p>
+              <p>
+                Coming soon!
+              </p>
 
-          <p><strong>Technologies:</strong> C, Systems Programming</p>
+              <p><strong>Technologies:</strong> Python, Selenium, Web Scraping, Automation, NLP, Javascript, RESTful APIs</p>
 
-          <p class="project-links">
-            <a href="https://github.com/gilstero/.ogar" target="_blank">
-              <img src="/assets/github.png" class="link-icon"> GitHub
-            </a>
-          </p>
+              <p class="project-links">
+                <a href="https://github.com/gilstero" target="_blank">
+                  <img src="/assets/github.png" class="link-icon"> GitHub
+                </a>
+              </p>
+          </div>
+
+          <div class="project-gif"></div>
         </div>
+      </section>
 
-        <div class="project-gif"></div>
-      </div>
-    </section>
+      <!-- OGAR -->
+      <section class="project-card" data-project-card
+        data-skills="c systems programming zlib unix cli archives binary formats">
+        <div class="project-content">
+          <div class="project-text">
+            <h2>.ogar Archive Utility</h2>
+            <p class="project-date">Spring 2026</p>
 
-    <!-- MLAUTOC -->
-    <section class="project-card" data-project-card data-skills="react fastapi css typescript ts next.js nextjs api rest data visualization algorithms python web">
-      <div class="project-content">
-        <div class="project-text">
-          <h2>MLAUTOC.com</h2>
-          <p class="project-date">2025 to 2026</p>
+            <p>
+              <code>.ogar</code> is a custom archive framework written in C inspired by the
+              Unix <code>ar</code> utility. The project explores systems programming through
+              the design of a binary archive format with append-friendly records, explicit
+              table-of-contents indexing, rich metadata preservation, and optional
+              per-file compression using zlib.
+            </p>
 
-          <p>
-            MLAUTOC.com is a research website created to accompany my honors thesis
-            on multi-level treatment allocation policies. The site allows users to
-            explore policy simulations and visualize experimental results.
-          </p>
+            <p><strong>Technologies:</strong> C, Systems Programming</p>
 
-          <p><strong>Technologies:</strong> React, FastAPI, CSS, TS, Next.js, RESTful API Design, Data Visualization, Algorithms</p>
+            <p class="project-links">
+              <a href="https://github.com/gilstero/.ogar" target="_blank">
+                <img src="/assets/github.png" class="link-icon"> GitHub
+              </a>
+            </p>
+          </div>
 
-          <p class="project-links">
-            <a href="https://mlautoc.com" target="_blank">Website</a> |
-            <a href="https://github.com/gilstero/ML-TOC" target="_blank">
-              <img src="/assets/github.png" class="link-icon"> GitHub
-            </a>
-          </p>
+          <div class="project-gif"></div>
         </div>
+      </section>
 
-        <div class="project-gif">
-          <img src="/assets/mlautoc.png" alt="MLAUTOC Website">
+      <!-- MLAUTOC -->
+      <section class="project-card" data-project-card
+        data-skills="react fastapi css typescript ts next.js nextjs api rest data visualization algorithms python web">
+        <div class="project-content">
+          <div class="project-text">
+            <h2>MLAUTOC.com</h2>
+            <p class="project-date">2025 to 2026</p>
+
+            <p>
+              MLAUTOC.com is a research website created to accompany my honors thesis
+              on multi-level treatment allocation policies. The site allows users to
+              explore policy simulations and visualize experimental results.
+            </p>
+
+            <p><strong>Technologies:</strong> React, FastAPI, CSS, TS, Next.js, RESTful API Design, Data Visualization,
+              Algorithms</p>
+
+            <p class="project-links">
+              <a href="https://mlautoc.com" target="_blank">Website</a> |
+              <a href="https://github.com/gilstero/ML-TOC" target="_blank">
+                <img src="/assets/github.png" class="link-icon"> GitHub
+              </a>
+            </p>
+          </div>
+
+          <div class="project-gif">
+            <img src="/assets/mlautoc.png" alt="MLAUTOC Website">
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- BALL SIM -->
-    <section class="project-card" data-project-card data-skills="python qt physics simulation numerical methods rendering desktop">
-      <div class="project-content">
-        <div class="project-text">
-          <h2>Ball Physics Simulation</h2>
-          <p class="project-date">Spring 2024</p>
+      <!-- BALL SIM -->
+      <section class="project-card" data-project-card
+        data-skills="python qt physics simulation numerical methods rendering desktop">
+        <div class="project-content">
+          <div class="project-text">
+            <h2>Ball Physics Simulation</h2>
+            <p class="project-date">Spring 2024</p>
 
-          <p>
-            A real-time physics simulation written in Python that models gravity,
-            motion, and collision for a bouncing ball system. The project explores
-            numerical simulation and interactive rendering.
-          </p>
+            <p>
+              A real-time physics simulation written in Python that models gravity,
+              motion, and collision for a bouncing ball system. The project explores
+              numerical simulation and interactive rendering.
+            </p>
 
-          <p><strong>Technologies:</strong> Python, Qt</p>
+            <p><strong>Technologies:</strong> Python, Qt</p>
 
-          <p class="project-links">
-            <a href="https://github.com/gilstero/BallSim2" target="_blank">
-              <img src="/assets/github.png" class="link-icon"> GitHub
-            </a>
-          </p>
+            <p class="project-links">
+              <a href="https://github.com/gilstero/BallSim2" target="_blank">
+                <img src="/assets/github.png" class="link-icon"> GitHub
+              </a>
+            </p>
+          </div>
+
+          <div class="project-gif"></div>
         </div>
+      </section>
 
-        <div class="project-gif"></div>
-      </div>
-    </section>
+      <!-- EAGLE EXCHANGE -->
+      <section class="project-card" data-project-card
+        data-skills="react django python tailwind axios oauth jwt marketplace web full stack">
+        <div class="project-content">
+          <div class="project-text">
+            <h2>Eagle Exchange</h2>
+            <p class="project-date">Fall 2023</p>
 
-    <!-- EAGLE EXCHANGE -->
-    <section class="project-card" data-project-card data-skills="react django python tailwind axios oauth jwt marketplace web full stack">
-      <div class="project-content">
-        <div class="project-text">
-          <h2>Eagle Exchange</h2>
-          <p class="project-date">Fall 2023</p>
+            <p>
+              Eagle Exchange is a marketplace platform designed for Emory students to
+              buy and sell services within the campus community. It allows users to
+              create listings, communicate, and manage service requests.
+            </p>
 
-          <p>
-            Eagle Exchange is a marketplace platform designed for Emory students to
-            buy and sell services within the campus community. It allows users to
-            create listings, communicate, and manage service requests.
-          </p>
+            <p><strong>Technologies:</strong> React, Django, Python, Tailwind, Axios, OAuth, JWT</p>
 
-          <p><strong>Technologies:</strong> React, Django, Python, Tailwind, Axios, OAuth, JWT</p>
+            <p class="project-links">
+              <a href="https://github.com/gilstero/EmoryExchange" target="_blank">
+                <img src="/assets/github.png" class="link-icon"> GitHub
+              </a>
+            </p>
+          </div>
 
-          <p class="project-links">
-            <a href="https://github.com/gilstero/EmoryExchange" target="_blank">
-              <img src="/assets/github.png" class="link-icon"> GitHub
-            </a>
-          </p>
+          <div class="project-gif"></div>
         </div>
+      </section>
 
-        <div class="project-gif"></div>
-      </div>
-    </section>
+      <!-- REGRESSION -->
+      <section class="project-card" data-project-card
+        data-skills="react python data visualization statistics regression education web">
+        <div class="project-content">
+          <div class="project-text">
+            <h2>Regression Visualizer Website</h2>
+            <p class="project-date">Spring 2023</p>
 
-    <!-- REGRESSION -->
-    <section class="project-card" data-project-card data-skills="react python data visualization statistics regression education web">
-      <div class="project-content">
-        <div class="project-text">
-          <h2>Regression Visualizer Website</h2>
-          <p class="project-date">Spring 2023</p>
+            <p>
+              An interactive regression visualization tool designed to help students
+              understand how regression models respond to changes in datasets and
+              parameters.
+            </p>
 
-          <p>
-            An interactive regression visualization tool designed to help students
-            understand how regression models respond to changes in datasets and
-            parameters.
-          </p>
+            <p><strong>Technologies:</strong> React, Python, Data Visualization</p>
 
-          <p><strong>Technologies:</strong> React, Python, Data Visualization</p>
+            <p class="project-links">
+              <a href="https://github.com/gilstero/Regression" target="_blank">
+                <img src="/assets/github.png" class="link-icon"> GitHub
+              </a>
+            </p>
+          </div>
 
-          <p class="project-links">
-            <a href="https://github.com/gilstero/Regression" target="_blank">
-              <img src="/assets/github.png" class="link-icon"> GitHub
-            </a>
-          </p>
+          <div class="project-gif">
+            <img src="/assets/regression.gif" alt="Regression GIF">
+          </div>
         </div>
-
-        <div class="project-gif">
-          <img src="/assets/regression.gif" alt="Regression GIF">
-        </div>
-      </div>
-    </section>
+      </section>
     </section>
 
     <section class="project-group" data-project-group>
-    <h1>Software Research Projects</h1>
+      <h1>Software Research Projects</h1>
 
-    <section class="project-card" data-project-card data-skills="">
-      <div class="project-content">
-        <div class="project-text">
-          <h2>Coming Soon...</h2>
+      <section class="project-card" data-project-card data-skills="">
+        <div class="project-content">
+          <div class="project-text">
+            <h2>Coming Soon...</h2>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
     </section>
 
     <section class="project-group" data-project-group>
-    <h1>Site Accessible Games</h1>
+      <h1>Site Accessible Games</h1>
 
-    <section class="project-card" data-project-card data-skills="html css javascript js canvas game design web">
-      <div class="project-content">
-        <div class="project-text">
-          <h2>Olin Tycoon</h2>
-          <p class="project-date">Spring 2026</p>
+      <section class="project-card" data-project-card data-skills="html css javascript js canvas game design web">
+        <div class="project-content">
+          <div class="project-text">
+            <h2>Olin Tycoon</h2>
+            <p class="project-date">Spring 2026</p>
 
-          <p>
-            An interactive simulation game where a player manages strategic decsions to grow and
-            make money. The opjective of this game is to make the most money. This idea was inspired
-            from adds that I have seen on Instagram.
-          </p>
+            <p>
+              An interactive simulation game where a player manages strategic decsions to grow and
+              make money. The opjective of this game is to make the most money. This idea was inspired
+              from adds that I have seen on Instagram.
+            </p>
 
-          <p><strong>Technologies:</strong> HTML, CSS, JS</p>
+            <p><strong>Technologies:</strong> HTML, CSS, JS</p>
 
-          <p class="project-links">
-            <a href="/sag/tycoon/">Tycoon</a>
-          </p>
+            <p class="project-links">
+              <a href="/sag/tycoon/">Tycoon</a>
+            </p>
+          </div>
+
+          <div class="project-gif">
+            <img src="/assets/tycoonimage.png" alt="tycoon game screenshot">
+          </div>
         </div>
+      </section>
 
-        <div class="project-gif">
-          <img src="/assets/tycoonimage.png" alt="tycoon game screenshot">
+      <section class="project-card" data-project-card
+        data-skills="html css javascript js canvas game design python flask socket.io multiplayer web">
+        <div class="project-content">
+          <div class="project-text">
+            <h2>Maze Racer</h2>
+            <p class="project-date">Spring 2026</p>
+
+            <p>
+              A two-player maze racing game with matchmaking, character customization, and power-ups.
+              The browser game runs on the site, while multiplayer uses a separate realtime backend.
+            </p>
+
+            <p><strong>Technologies:</strong> HTML, CSS, JS, Python, Flask, Socket.IO</p>
+
+            <p class="project-links">
+              <a href="/sag/mazeracer/">Maze Racer</a>
+            </p>
+          </div>
+
+          <div class="project-gif"></div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section class="project-card" data-project-card data-skills="html css javascript js canvas game design web">
-      <div class="project-content">
-        <div class="project-text">
-          <h2>Jada Dogs</h2>
-          <p class="project-date">Spring 2026</p>
+      <section class="project-card" data-project-card data-skills="html css javascript js canvas game design web">
+        <div class="project-content">
+          <div class="project-text">
+            <h2>Jada Dogs</h2>
+            <p class="project-date">Spring 2026</p>
 
-          <p>
-            Jada Dogs is inspired by a bernadoodle I know named Jada.
-            In this game, you play as Jada's owner. It is your job to take care of Jada by feeding her,
-            walking her, and grooming her. Jada has a happiness meter that MUST be kept above 0.
-            This game was not designed to be a challenge, just an experiment to learn more JS and game design inside of a web env.
-          </p>
+            <p>
+              Jada Dogs is inspired by a bernadoodle I know named Jada.
+              In this game, you play as Jada's owner. It is your job to take care of Jada by feeding her,
+              walking her, and grooming her. Jada has a happiness meter that MUST be kept above 0.
+              This game was not designed to be a challenge, just an experiment to learn more JS and game design inside
+              of a web env.
+            </p>
 
-          <p><strong>Technologies:</strong> HTML, CSS, JS</p>
+            <p><strong>Technologies:</strong> HTML, CSS, JS</p>
 
-          <p class="project-links">
-            <a href="/sag/jada/">Jada</a>
-          </p>
+            <p class="project-links">
+              <a href="/sag/jada/">Jada</a>
+            </p>
+          </div>
+
+          <div class="project-gif">
+            <img src="/assets/jadaimage.png" alt="Jada Dogs Screenshot">
+          </div>
         </div>
-
-        <div class="project-gif">
-          <img src="/assets/jadaimage.png" alt="Jada Dogs Screenshot">
-        </div>
-      </div>
-    </section>
+      </section>
     </section>
 
   </main>
@@ -302,4 +354,5 @@
     applyProjectFilter();
   </script>
 </body>
+
 </html>
