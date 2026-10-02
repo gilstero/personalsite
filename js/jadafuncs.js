@@ -133,10 +133,10 @@ focusButton.addEventListener("click", () => {
   gameFocused = !gameFocused;
 
   if (gameFocused) {
-    focusButton.textContent = "Release Game";
+    focusButton.textContent = "End Game";
     focusButton.classList.add("active");
   } else {
-    focusButton.textContent = "Focus Game";
+    focusButton.textContent = "Start Game";
     focusButton.classList.remove("active");
     clearKeys();
   }
