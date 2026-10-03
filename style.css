@@ -73,6 +73,7 @@ body {
   .site-footer-link {
     text-decoration: none;
     color: inherit;
+    margin-right: 24px;
   }
 
   .site-footer-link:hover {
