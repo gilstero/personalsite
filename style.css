@@ -263,14 +263,14 @@ body {
     background: white;
     padding: 26px 30px;
     border-radius: 18px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
     margin-bottom: 28px;
     transition: transform 0.25s ease, box-shadow 0.25s ease;
   }
   
   .experience-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 16px 36px rgba(0,0,0,0.14);
+    transform: translateY(-6px);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.14);
   }
   
   .entry + .entry {
