@@ -8,9 +8,8 @@ The site currently includes:
 - Main: a short introduction and personal homepage
 - Experience: work, research, and community involvement
 - Projects: games, experiments, and technical builds
-- Blog: a lightweight notes space for ideas and writeups
+- Posts: a lightweight notes space for ideas and writeups
 
 The goal of the site is to stay simple, personal, and easy to keep updating.
-
 
 
