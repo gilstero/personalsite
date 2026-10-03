@@ -3,7 +3,12 @@
   "redirects": [
     {
       "source": "/blog.html",
-      "destination": "/blog/",
+      "destination": "/posts/",
+      "permanent": true
+    },
+    {
+      "source": "/blog/",
+      "destination": "/posts/",
       "permanent": true
     },
     {
