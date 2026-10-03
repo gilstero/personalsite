@@ -5,6 +5,9 @@ body {
     background: #f7f7f7;
     line-height: 1.6;
     padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 
     background:
       radial-gradient(circle at top left, rgba(79, 70, 229, 0.18), transparent 32%),
@@ -84,6 +87,9 @@ body {
     max-width: 900px;
     margin: auto;
     padding: 110px 20px 40px 20px;
+    width: 100%;
+    box-sizing: border-box;
+    flex: 1;
   }
   
   .profile {
@@ -302,7 +308,7 @@ body {
       padding 0.28s ease;
     max-height: 900px;
     opacity: 1;
-    overflow: hidden;
+    overflow: visible;
   }
   
   .project-card:hover {
@@ -319,6 +325,7 @@ body {
     pointer-events: none;
     transform: translateY(10px) scale(0.985);
     box-shadow: none;
+    overflow: hidden;
   }
 
   .project-group {
