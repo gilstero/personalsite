@@ -223,9 +223,30 @@ body {
   }
   
   @media (max-width: 700px) {
+    nav {
+      align-items: flex-start;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    nav > div {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 12px;
+    }
+
+    nav a {
+      margin-left: 0;
+    }
+
+    main {
+      padding: 96px 14px 32px;
+    }
+
     .profile {
       flex-direction: column;
       text-align: center;
+      padding: 22px 18px;
     }
 
     .site-footer-inner {
@@ -242,6 +263,22 @@ body {
     .photo-card.rect {
       grid-column: span 1;
       aspect-ratio: 4 / 3;
+    }
+
+    .experience-card,
+    .project-card {
+      padding: 22px 18px;
+    }
+
+    .experience-card h2,
+    .project-card h2 {
+      font-size: 1.35rem;
+    }
+
+    .entry p,
+    .entry li,
+    .project-card p {
+      overflow-wrap: anywhere;
     }
   }
 
