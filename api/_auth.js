@@ -4,7 +4,11 @@ const SESSION_COOKIE = "blog_admin_session";
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7;
 
 function getSecret() {
-  return process.env.BLOG_SESSION_SECRET || process.env.BLOG_ADMIN_PASSWORD || "dev-secret";
+  const secret = process.env.BLOG_SESSION_SECRET;
+  if (!secret) {
+    throw new Error("BLOG_SESSION_SECRET is not set.");
+  }
+  return secret;
 }
 
 function sign(value) {
@@ -48,7 +52,13 @@ function isAuthenticated(req) {
 
   const [payload, signature] = token.split(".");
 
-  if (!payload || !signature || sign(payload) !== signature) {
+  if (!payload || !signature || !/^[a-f0-9]{64}$/.test(signature)) {
+    return false;
+  }
+
+  const expectedSignature = Buffer.from(sign(payload), "hex");
+  const providedSignature = Buffer.from(signature, "hex");
+  if (!crypto.timingSafeEqual(expectedSignature, providedSignature)) {
     return false;
   }
 
@@ -61,7 +71,8 @@ function isAuthenticated(req) {
 }
 
 function sessionCookie(token) {
-  return `${SESSION_COOKIE}=${token}; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=${SESSION_TTL_SECONDS}`;
+  const secure = process.env.NODE_ENV === "production" ? "; Secure" : "";
+  return `${SESSION_COOKIE}=${token}; Path=/; HttpOnly; SameSite=Lax${secure}; Max-Age=${SESSION_TTL_SECONDS}`;
 }
 
 module.exports = {

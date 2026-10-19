@@ -14,6 +14,11 @@ module.exports = async (req, res) => {
     return;
   }
 
+  if (!process.env.BLOG_SESSION_SECRET) {
+    res.status(500).json({ error: "BLOG_SESSION_SECRET is not set." });
+    return;
+  }
+
   if (password !== expectedPassword) {
     res.status(401).json({ error: "Incorrect password." });
     return;

@@ -2,13 +2,10 @@
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Posts</title>
+  <meta name="description" content="Articles and notes by Olin Gilster.">
+  <title>Posts | Olin Gilster</title>
   <link rel="stylesheet" href="/style.css">
   <link rel="icon" type="image/x-icon" href="/assets/ps.png">
-  <link rel="prefetch" href="/">
-  <link rel="prefetch" href="/experience/">
-  <link rel="prefetch" href="/projects/">
-  <link rel="prefetch" href="/posts/">
 </head>
 <body>
   <header>
@@ -24,11 +21,11 @@
   </header>
 
   <main class="blog-main">
-    <button id="add-note-button" class="floating-add-button" type="button" aria-label="Add a note">
-      +
-    </button>
-
-    <section id="notes-list" class="notes-list" aria-live="polite"></section>
+    <input id="article-file" type="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden>
+    <p id="upload-status" class="upload-status" role="status" aria-live="polite"></p>
+    <section aria-label="Published articles">
+      <div id="articles-list" class="articles-list" aria-live="polite"></div>
+    </section>
   </main>
 
   <div id="modal-backdrop" class="modal-backdrop hidden"></div>
@@ -36,89 +33,54 @@
   <section id="login-modal" class="modal-panel hidden" aria-hidden="true" aria-label="Admin login">
     <button id="close-login" class="modal-close" type="button" aria-label="Close login">&times;</button>
     <form id="login-form" class="modal-form login-form">
+      <h2>Admin login</h2>
       <label for="admin-password">Password</label>
-      <input id="admin-password" class="password-input" type="text" autocomplete="off" required>
-      <button class="login-arrow-button" type="submit" aria-label="Unlock">
-        &rarr;
-      </button>
-      <p id="login-status" class="modal-status"></p>
+      <input id="admin-password" class="password-input" type="password" autocomplete="current-password" required>
+      <button class="login-arrow-button" type="submit" aria-label="Unlock">&rarr;</button>
+      <p id="login-status" class="modal-status" role="status" aria-live="polite"></p>
     </form>
   </section>
 
-  <section id="composer-modal" class="modal-panel hidden" aria-hidden="true" aria-label="Add a note">
-    <button id="close-composer" class="modal-close" type="button" aria-label="Close composer">&times;</button>
+  <section id="composer-modal" class="modal-panel hidden" aria-hidden="true" aria-label="Publish article">
+    <button id="close-composer" class="modal-close" type="button" aria-label="Close publish form">&times;</button>
     <form id="composer-form" class="modal-form">
-      <label for="note-title">Title</label>
-      <input id="note-title" type="text" placeholder="Note title">
-
-      <label for="note-body">Note</label>
-      <textarea id="note-body" rows="8" placeholder="Write your note..."></textarea>
-
-      <button class="save-note-button" type="submit">Add Note</button>
+      <h2>Publish article</h2>
+      <p id="selected-file-name" class="selected-file-name"></p>
+      <label for="article-title">Article title</label>
+      <input id="article-title" class="password-input" type="text" maxlength="160" required>
+      <button id="publish-button" class="save-note-button" type="submit">Publish</button>
+      <p id="composer-status" class="modal-status" role="status" aria-live="polite"></p>
     </form>
+  </section>
+
+  <section id="reader-modal" class="article-reader hidden" aria-hidden="true" aria-label="Article">
+    <button id="close-reader" class="modal-close" type="button" aria-label="Close article">&times;</button>
+    <article>
+      <p id="reader-date" class="article-date"></p>
+      <h1 id="reader-title"></h1>
+      <div id="reader-content" class="article-content"></div>
+    </article>
   </section>
 
   <script>
-    const addNoteButton = document.getElementById("add-note-button");
-    const notesList = document.getElementById("notes-list");
+    const MAX_DOCX_SIZE = 4 * 1024 * 1024;
+    const articlesList = document.getElementById("articles-list");
+    const articleFileInput = document.getElementById("article-file");
+    const uploadStatus = document.getElementById("upload-status");
     const modalBackdrop = document.getElementById("modal-backdrop");
     const loginModal = document.getElementById("login-modal");
     const composerModal = document.getElementById("composer-modal");
-    const closeLoginButton = document.getElementById("close-login");
-    const closeComposerButton = document.getElementById("close-composer");
+    const readerModal = document.getElementById("reader-modal");
     const loginForm = document.getElementById("login-form");
     const composerForm = document.getElementById("composer-form");
     const adminPasswordInput = document.getElementById("admin-password");
-    const noteTitleInput = document.getElementById("note-title");
-    const noteBodyInput = document.getElementById("note-body");
+    const articleTitleInput = document.getElementById("article-title");
     const loginStatus = document.getElementById("login-status");
+    const composerStatus = document.getElementById("composer-status");
+    const publishButton = document.getElementById("publish-button");
 
     let isAuthenticated = false;
-
-    function createDeleteButton(index) {
-      const deleteButton = document.createElement("button");
-      deleteButton.type = "button";
-      deleteButton.className = "note-delete-button";
-      deleteButton.setAttribute("aria-label", "Delete note");
-      deleteButton.innerHTML = `
-        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-          <path d="M9 3.75h6l.75 1.5H19.5a.75.75 0 0 1 0 1.5h-15a.75.75 0 0 1 0-1.5h3.75L9 3.75Zm.75 6a.75.75 0 0 1 .75.75v6a.75.75 0 0 1-1.5 0v-6a.75.75 0 0 1 .75-.75Zm4.5 0a.75.75 0 0 1 .75.75v6a.75.75 0 0 1-1.5 0v-6a.75.75 0 0 1 .75-.75ZM7.5 8.25h9l-.72 10.13A1.5 1.5 0 0 1 14.28 19.5H9.72a1.5 1.5 0 0 1-1.5-1.12L7.5 8.25Z"/>
-        </svg>
-      `;
-      deleteButton.addEventListener("click", () => deleteNote(index));
-      return deleteButton;
-    }
-
-    function loadNotes() {
-      const storedNotes = JSON.parse(localStorage.getItem("blog-notes") || "[]");
-      notesList.innerHTML = "";
-
-      storedNotes.forEach((note, index) => {
-        const noteCard = document.createElement("article");
-        noteCard.className = "note-card";
-
-        if (isAuthenticated) {
-          noteCard.appendChild(createDeleteButton(index));
-        }
-
-        const title = document.createElement("h2");
-        title.textContent = note.title || "Untitled note";
-
-        const body = document.createElement("p");
-        body.textContent = note.body || "";
-
-        noteCard.appendChild(title);
-        noteCard.appendChild(body);
-        notesList.prepend(noteCard);
-      });
-    }
-
-    function deleteNote(index) {
-      const notes = JSON.parse(localStorage.getItem("blog-notes") || "[]");
-      notes.splice(index, 1);
-      localStorage.setItem("blog-notes", JSON.stringify(notes));
-      loadNotes();
-    }
+    let pendingFile = null;
 
     function openModal(modal) {
       modal.classList.remove("hidden");
@@ -130,101 +92,300 @@
       modal.classList.add("hidden");
       modal.setAttribute("aria-hidden", "true");
 
-      if (loginModal.classList.contains("hidden") && composerModal.classList.contains("hidden")) {
+      if (loginModal.classList.contains("hidden") &&
+          composerModal.classList.contains("hidden") &&
+          readerModal.classList.contains("hidden")) {
         modalBackdrop.classList.add("hidden");
       }
     }
 
-    async function checkSession() {
-      try {
-        const response = await fetch("/api/session");
-        const data = await response.json();
-        isAuthenticated = Boolean(data.authenticated);
-      } catch (error) {
-        isAuthenticated = false;
+    function formatDate(dateValue) {
+      if (!dateValue) {
+        return "";
       }
 
-      loadNotes();
+      const date = new Date(dateValue);
+      return Number.isNaN(date.getTime())
+        ? ""
+        : date.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
     }
 
-    async function handleAddClick() {
-      if (!isAuthenticated) {
+    function renderArticles(articles) {
+      articlesList.replaceChildren();
+
+      if (!articles.length) {
+        const emptyMessage = document.createElement("p");
+        emptyMessage.className = "empty-articles";
+        emptyMessage.textContent = "No articles yet.";
+        articlesList.appendChild(emptyMessage);
+        return;
+      }
+
+      articles.forEach((article) => {
+        const card = document.createElement("button");
+        card.type = "button";
+        card.className = "article-card";
+        card.addEventListener("click", () => openArticle(article));
+
+        const icon = document.createElement("img");
+        icon.src = "/assets/document.svg";
+        icon.alt = "";
+        icon.className = "article-icon";
+        icon.setAttribute("aria-hidden", "true");
+
+        const title = document.createElement("span");
+        title.className = "article-card-title";
+        title.textContent = article.title || "Untitled article";
+
+        const date = document.createElement("time");
+        date.className = "article-date";
+        date.textContent = formatDate(article.uploadedAt);
+        if (article.uploadedAt) {
+          date.dateTime = article.uploadedAt;
+        }
+
+        card.append(icon, title, date);
+        articlesList.appendChild(card);
+      });
+    }
+
+    async function loadArticles() {
+      articlesList.textContent = "Loading articles...";
+
+      try {
+        const response = await fetch("/assets/articles/index.json", { cache: "no-store" });
+        if (!response.ok) {
+          throw new Error("Could not load the article list.");
+        }
+        const articles = await response.json();
+        if (!Array.isArray(articles)) {
+          throw new Error("The article list has an invalid format.");
+        }
+        articles.sort((left, right) =>
+          new Date(right.uploadedAt || 0) - new Date(left.uploadedAt || 0)
+        );
+        renderArticles(articles);
+      } catch (error) {
+        articlesList.textContent = error.message || "Could not load articles.";
+      }
+    }
+
+    function appendTextWithImages(container, text, images) {
+      const imageByIndex = images || [];
+      const blocks = text.trim().split(/\n\s*\n/).filter(Boolean);
+
+      blocks.forEach((block) => {
+        const paragraph = document.createElement("p");
+        const markerPattern = /\[\[ARTICLE_IMAGE_(\d+)\]\]/g;
+        let lastIndex = 0;
+        let match;
+
+        while ((match = markerPattern.exec(block)) !== null) {
+          paragraph.appendChild(document.createTextNode(block.slice(lastIndex, match.index)));
+          const image = imageByIndex[Number(match[1])];
+          if (image && typeof image.path === "string" && image.path.startsWith("assets/articles/")) {
+            const imageElement = document.createElement("img");
+            imageElement.src = `/${image.path}`;
+            imageElement.alt = image.alt || "Article image";
+            imageElement.loading = "lazy";
+            paragraph.appendChild(imageElement);
+          }
+          lastIndex = markerPattern.lastIndex;
+        }
+
+        paragraph.appendChild(document.createTextNode(block.slice(lastIndex)));
+        container.appendChild(paragraph);
+      });
+    }
+
+    async function openArticle(article) {
+      const readerTitle = document.getElementById("reader-title");
+      const readerDate = document.getElementById("reader-date");
+      const readerContent = document.getElementById("reader-content");
+      readerTitle.textContent = article.title || "Untitled article";
+      readerDate.textContent = formatDate(article.uploadedAt);
+      readerContent.textContent = "Loading article...";
+      openModal(readerModal);
+      document.body.classList.add("no-scroll");
+
+      try {
+        if (typeof article.file !== "string" || !article.file.startsWith("assets/articles/")) {
+          throw new Error("This article has an invalid file path.");
+        }
+        const response = await fetch(`/${article.file}`);
+        if (!response.ok) {
+          throw new Error("Could not load this article.");
+        }
+        const text = await response.text();
+        readerContent.replaceChildren();
+        appendTextWithImages(readerContent, text, article.images);
+      } catch (error) {
+        readerContent.textContent = error.message || "Could not load this article.";
+      }
+    }
+
+    function closeReader() {
+      closeModal(readerModal);
+      document.body.classList.remove("no-scroll");
+    }
+
+    function handleFile(file) {
+      if (!file) {
+        return;
+      }
+
+      if (!file.name.toLowerCase().endsWith(".docx")) {
+        uploadStatus.textContent = "Choose a .docx file. Export Apple Pages or Google Docs files as DOCX first.";
+        uploadStatus.classList.add("is-error");
+        return;
+      }
+
+      if (file.size > MAX_DOCX_SIZE) {
+        uploadStatus.textContent = "This DOCX is too large. The maximum upload size is 4 MB.";
+        uploadStatus.classList.add("is-error");
+        return;
+      }
+
+      pendingFile = file;
+      uploadStatus.textContent = "";
+      uploadStatus.classList.remove("is-error");
+
+      if (isAuthenticated) {
+        openComposer();
+      } else {
         loginStatus.textContent = "";
         adminPasswordInput.value = "";
         openModal(loginModal);
         adminPasswordInput.focus();
-        return;
       }
+    }
 
+    function openComposer() {
+      document.getElementById("selected-file-name").textContent = pendingFile
+        ? pendingFile.name
+        : "";
+      composerStatus.textContent = "";
+      articleTitleInput.value = pendingFile
+        ? pendingFile.name.replace(/\.docx$/i, "").replace(/[_-]+/g, " ")
+        : "";
       openModal(composerModal);
-      noteTitleInput.focus();
+      articleTitleInput.focus();
     }
 
     async function handleLogin(event) {
       event.preventDefault();
       loginStatus.textContent = "";
 
-      const response = await fetch("/api/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ password: adminPasswordInput.value })
-      });
+      try {
+        const response = await fetch("/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password: adminPasswordInput.value })
+        });
+        const data = await response.json();
 
-      const data = await response.json();
+        if (!response.ok) {
+          loginStatus.textContent = data.error || "Login failed.";
+          return;
+        }
 
-      if (!response.ok) {
-        loginStatus.textContent = data.error || "Login failed.";
-        return;
+        isAuthenticated = true;
+        closeModal(loginModal);
+        openComposer();
+      } catch (error) {
+        loginStatus.textContent = "Could not reach the login service. Try again.";
       }
-
-      isAuthenticated = true;
-      closeModal(loginModal);
-      loadNotes();
-      openModal(composerModal);
-      noteTitleInput.focus();
     }
 
-    function handleComposerSubmit(event) {
+    async function handlePublish(event) {
       event.preventDefault();
+      const title = articleTitleInput.value.trim();
 
-      const title = noteTitleInput.value.trim();
-      const body = noteBodyInput.value.trim();
-
-      if (!title && !body) {
+      if (!pendingFile || !title) {
+        composerStatus.textContent = "Choose a DOCX file and enter an article title.";
         return;
       }
 
-      const notes = JSON.parse(localStorage.getItem("blog-notes") || "[]");
-      notes.unshift({ title, body });
-      localStorage.setItem("blog-notes", JSON.stringify(notes));
+      publishButton.disabled = true;
+      composerStatus.textContent = "Converting and publishing...";
 
-      noteTitleInput.value = "";
-      noteBodyInput.value = "";
-      closeModal(composerModal);
-      loadNotes();
+      try {
+        const response = await fetch(`/api/articles?title=${encodeURIComponent(title)}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+          },
+          body: pendingFile
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Could not publish the article.");
+        }
+
+        closeModal(composerModal);
+        pendingFile = null;
+        articleFileInput.value = "";
+        uploadStatus.classList.remove("is-error");
+        uploadStatus.textContent = data.warnings
+          ? "Published. Some document formatting could not be converted."
+          : "Published to the site repository. It will appear after the site redeploys.";
+      } catch (error) {
+        composerStatus.textContent = error.message || "Could not publish the article.";
+      } finally {
+        publishButton.disabled = false;
+      }
     }
 
-    addNoteButton.addEventListener("click", handleAddClick);
+    articleFileInput.addEventListener("change", () => handleFile(articleFileInput.files[0]));
+    document.querySelector(".blog-main").addEventListener("dragover", (event) => {
+      if (!event.dataTransfer.types.includes("Files")) {
+        return;
+      }
+      event.preventDefault();
+    });
+    document.querySelector(".blog-main").addEventListener("drop", (event) => {
+      if (!event.dataTransfer.files.length) {
+        return;
+      }
+      event.preventDefault();
+      handleFile(event.dataTransfer.files[0]);
+    });
     loginForm.addEventListener("submit", handleLogin);
-    composerForm.addEventListener("submit", handleComposerSubmit);
-    closeLoginButton.addEventListener("click", () => closeModal(loginModal));
-    closeComposerButton.addEventListener("click", () => closeModal(composerModal));
+    composerForm.addEventListener("submit", handlePublish);
+    document.getElementById("close-login").addEventListener("click", () => closeModal(loginModal));
+    document.getElementById("close-composer").addEventListener("click", () => closeModal(composerModal));
+    document.getElementById("close-reader").addEventListener("click", closeReader);
     modalBackdrop.addEventListener("click", () => {
       closeModal(loginModal);
       closeModal(composerModal);
+      closeReader();
     });
-
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape") {
         closeModal(loginModal);
         closeModal(composerModal);
+        closeReader();
       }
     });
 
-    checkSession();
+    fetch("/api/session")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Could not verify the admin session.");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        isAuthenticated = Boolean(data.authenticated);
+      })
+      .catch(() => {
+        isAuthenticated = false;
+      });
+
+    loadArticles();
   </script>
+
   <footer class="site-footer-bar">
     <div class="site-footer-inner">
       <a class="site-footer-link" href="https://github.com/gilstero" target="_blank" rel="noopener noreferrer">

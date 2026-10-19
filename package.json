@@ -1,0 +1,14 @@
+{
+  "name": "personalsite",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "html-to-text": "^9.0.5",
+    "mammoth": "^1.9.1"
+  },
+  "overrides": {
+    "argparse": "2.0.1"
+  }
+}

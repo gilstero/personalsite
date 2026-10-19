@@ -589,98 +589,77 @@ body {
     box-shadow: 0 10px 22px rgba(37, 99, 235, 0.2);
   }
 
-  .notes-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 280px));
-    gap: 18px;
-    justify-content: center;
-    align-content: start;
-    padding: 16px 20px 40px;
-  }
-
-  .note-card {
+  .blog-main {
     position: relative;
-    width: 100%;
-    min-height: 260px;
-    background: white;
-    padding: 22px 24px;
-    border-radius: 18px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    min-height: calc(100vh - 150px);
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 83px 20px 48px;
     box-sizing: border-box;
   }
 
-  .note-delete-button {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    display: inline-flex;
+  .upload-status {
+    margin: 0 0 12px;
+    color: #25633a;
+  }
+
+  .upload-status.is-error {
+    color: #b91c1c;
+  }
+
+  .articles-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 26px 20px;
+    justify-items: center;
+  }
+
+  .article-card {
+    display: flex;
+    width: 100%;
+    max-width: 190px;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    padding: 0;
+    gap: 7px;
+    padding: 14px 10px;
     border: 0;
-    border-radius: 999px;
+    border-radius: 16px;
     background: transparent;
-    color: #dc2626;
+    color: inherit;
+    font: inherit;
+    text-align: center;
     cursor: pointer;
     transition: background-color 0.2s ease, transform 0.2s ease;
   }
 
-  .note-delete-button svg {
-    width: 15px;
-    height: 15px;
-    fill: currentColor;
+  .article-card:hover,
+  .article-card:focus-visible {
+    background: rgba(255, 255, 255, 0.82);
+    outline: none;
+    transform: translateY(-3px);
   }
 
-  .note-delete-button:hover {
-    background: rgba(220, 38, 38, 0.1);
-    transform: scale(1.05);
+  .article-icon {
+    width: 132px;
+    height: 132px;
+    object-fit: contain;
+    filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.12));
   }
 
-  .note-card h2 {
-    margin-top: 0;
-    margin-bottom: 8px;
-    padding-right: 24px;
+  .article-card-title {
+    font-weight: 700;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
   }
 
-  .note-card p {
-    margin-bottom: 0;
-    color: #444;
-    line-height: 1.55;
+  .article-date {
+    color: #666;
+    font-size: 0.88rem;
   }
 
-  .placeholder-note {
-    border: 1px dashed #d8d8d8;
-    background: rgba(255, 255, 255, 0.7);
-  }
-
-  .blog-main {
-    position: relative;
-    min-height: calc(100vh - 150px);
-  }
-
-  .floating-add-button {
-    position: fixed;
-    top: 92px;
-    right: max(12px, calc((100vw - 900px) / 2 - 8px));
-    width: 56px;
-    height: 56px;
-    border: 0;
-    border-radius: 999px;
-    background: #111;
-    color: white;
-    font-size: 2rem;
-    line-height: 1;
-    cursor: pointer;
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.16);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    z-index: 1100;
-  }
-
-  .floating-add-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 16px 28px rgba(0, 0, 0, 0.22);
+  .empty-articles {
+    grid-column: 1 / -1;
+    color: #555;
   }
 
   .modal-backdrop {
@@ -701,6 +680,68 @@ body {
     padding: 22px;
     box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2);
     z-index: 1500;
+  }
+
+  .modal-form h2 {
+    margin: 0 32px 8px 0;
+  }
+
+  .selected-file-name {
+    margin: 0 0 4px;
+    color: #666;
+    overflow-wrap: anywhere;
+  }
+
+  .article-reader {
+    position: fixed;
+    inset: 4vh 4vw;
+    overflow: auto;
+    box-sizing: border-box;
+    padding: 36px clamp(20px, 6vw, 80px);
+    border-radius: 20px;
+    background: #fff;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
+    z-index: 1500;
+  }
+
+  .article-reader > article {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .article-reader h1 {
+    margin: 0 0 28px;
+    line-height: 1.2;
+  }
+
+  .article-reader .article-date {
+    margin: 0 0 10px;
+  }
+
+  .article-content {
+    color: #292929;
+    font-size: 1.06rem;
+    line-height: 1.75;
+    overflow-wrap: anywhere;
+  }
+
+  .article-content p {
+    margin: 0 0 1.25em;
+    white-space: pre-wrap;
+  }
+
+  .article-content img {
+    display: block;
+    max-width: 100%;
+    max-height: 680px;
+    height: auto;
+    margin: 18px auto;
+    border-radius: 8px;
+    object-fit: contain;
+  }
+
+  .no-scroll {
+    overflow: hidden;
   }
 
   .hidden {
@@ -728,6 +769,10 @@ body {
     justify-items: stretch;
     gap: 10px;
     padding-top: 4px;
+  }
+
+  .login-form h2 {
+    margin: 0 32px 8px 0;
   }
 
   .password-input {
@@ -766,27 +811,23 @@ body {
   }
 
   @media (max-width: 700px) {
-    .notes-list {
-      grid-template-columns: minmax(0, 1fr);
-      padding-left: 12px;
-      padding-right: 12px;
+    .blog-main {
+      padding: 68px 12px 36px;
     }
 
-    .note-card {
-      min-height: 220px;
+    .articles-list {
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 18px 10px;
     }
 
-    .notes-heading {
-      flex-direction: column;
+    .article-icon {
+      width: 112px;
+      height: 112px;
     }
 
-    .add-note-button {
-      align-self: flex-end;
-    }
-
-    .floating-add-button {
-      right: 12px;
-      top: 88px;
+    .article-reader {
+      inset: 2vh 2vw;
+      padding: 52px 20px 28px;
     }
   }
   
