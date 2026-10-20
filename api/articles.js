@@ -1,6 +1,7 @@
 const crypto = require("crypto");
 const mammoth = require("mammoth");
 const { htmlToText } = require("html-to-text");
+const profanityFilter = require("leo-profanity");
 const { isAuthenticated } = require("./_auth");
 
 const MAX_DOCX_SIZE = 4 * 1024 * 1024;
@@ -281,6 +282,18 @@ module.exports = async (req, res) => {
     const uploadedAt = new Date().toISOString();
     const slug = `${slugify(title)}-${Date.now().toString(36)}-${crypto.randomBytes(3).toString("hex")}`;
     const converted = convertDocument(conversion.value, slug);
+    const textToCheck = [
+      title,
+      converted.text,
+      ...converted.images.map((image) => image.alt)
+    ].join("\n");
+    if (profanityFilter.check(textToCheck)) {
+      throw new RequestError(
+        422,
+        "This document contains language blocked by the upload filter. Please revise it and try again."
+      );
+    }
+
     const article = {
       title,
       uploadedAt,

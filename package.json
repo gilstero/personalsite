@@ -6,6 +6,7 @@
   },
   "dependencies": {
     "html-to-text": "^9.0.5",
+    "leo-profanity": "^1.9.0",
     "mammoth": "^1.9.1"
   },
   "overrides": {

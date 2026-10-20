@@ -18,8 +18,14 @@ The `/posts/` page accepts `.docx` uploads by drag-and-drop or file selection.
 Apple Pages and Google Docs files should be exported as DOCX first. After
 password authentication, enter the article title. The site converts the
 document to plain text, extracts embedded PNG, JPEG, GIF, and WebP images, and
-commits the text, images, and article listing to this repository. Vercel should
-deploy the new post from that commit.
+checks the title, converted text, and image alt text against the English
+dictionary from `leo-profanity` before committing. If a match is found, the API
+rejects the upload and does not write any article files to GitHub. Text inside
+images is not OCR-scanned. The dictionary is not exhaustive and may miss terms
+or flag words without harmful context, so review flagged documents and don't
+treat this check as a guarantee. Accepted uploads commit the text, images, and
+article listing to this repository. Vercel should deploy the new post from
+that commit.
 
 Configure these Vercel environment variables for the API:
 
