@@ -3,13 +3,12 @@ const mammoth = require("mammoth");
 const { htmlToText } = require("html-to-text");
 const profanityFilter = require("leo-profanity");
 const { isAuthenticated } = require("./_auth");
+const { commitFiles, getGitHubConfig, readRepositoryJson } = require("./_github");
 
 const MAX_DOCX_SIZE = 4 * 1024 * 1024;
 const MAX_IMAGE_COUNT = 25;
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const MAX_ARTICLE_TEXT_BYTES = 1024 * 1024;
-const GITHUB_API = "https://api.github.com";
-
 class RequestError extends Error {
   constructor(status, message) {
     super(message);
@@ -114,142 +113,12 @@ function convertDocument(html, slug) {
   return { text, images };
 }
 
-function githubConfig() {
-  const token = process.env.GITHUB_TOKEN;
-  const repository = process.env.GITHUB_REPOSITORY || "gilstero/personalsite";
-  const branch = process.env.GITHUB_BRANCH || "main";
-  const [owner, name, ...extra] = repository.split("/");
-
-  if (!token) {
-    throw new RequestError(500, "GITHUB_TOKEN is not configured.");
-  }
-  if (!owner || !name || extra.length) {
-    throw new RequestError(500, "GITHUB_REPOSITORY must be in owner/repository format.");
-  }
-
-  return { token, owner, repository: name, branch };
-}
-
-async function githubRequest(config, path, options = {}) {
-  const response = await fetch(`${GITHUB_API}${path}`, {
-    ...options,
-    headers: {
-      Accept: "application/vnd.github+json",
-      Authorization: `Bearer ${config.token}`,
-      "X-GitHub-Api-Version": "2022-11-28",
-      "User-Agent": "personalsite-article-publisher",
-      ...(options.headers || {})
-    }
-  });
-  const responseText = await response.text();
-  let data = {};
-
-  if (responseText) {
-    try {
-      data = JSON.parse(responseText);
-    } catch (error) {
-      throw new Error(`GitHub returned an unreadable response (${response.status}).`);
-    }
-  }
-  if (!response.ok) {
-    if (response.status === 404 && options.allowNotFound) {
-      return null;
-    }
-    throw new Error(`GitHub API request failed (${response.status}): ${data.message || "Unknown error."}`);
-  }
-  return data;
-}
-
 async function getArticleIndex(config, branch) {
-  const encodedBranch = encodeURIComponent(branch);
-  const response = await githubRequest(
-    config,
-    `/repos/${config.owner}/${config.repository}/contents/assets/articles/index.json?ref=${encodedBranch}`,
-    { allowNotFound: true }
-  );
-
-  if (!response) {
-    return [];
-  }
-  if (response.encoding !== "base64" || typeof response.content !== "string") {
-    throw new Error("The existing article index is not a readable GitHub file.");
-  }
-
-  const articles = JSON.parse(Buffer.from(response.content, "base64").toString("utf8"));
+  const articles = await readRepositoryJson(config, "assets/articles/index.json", branch, []);
   if (!Array.isArray(articles)) {
     throw new Error("The existing article index does not contain an array.");
   }
   return articles;
-}
-
-async function createBlob(config, content, encoding = "utf-8") {
-  const data = await githubRequest(
-    config,
-    `/repos/${config.owner}/${config.repository}/git/blobs`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        content: encoding === "base64" ? content.toString("base64") : content,
-        encoding
-      })
-    }
-  );
-  return data.sha;
-}
-
-async function publishFiles(config, branch, files, commitMessage) {
-  const branchPath = branch.split("/").map(encodeURIComponent).join("/");
-  const ref = await githubRequest(
-    config,
-    `/repos/${config.owner}/${config.repository}/git/ref/heads/${branchPath}`
-  );
-  const parentSha = ref.object.sha;
-  const parentCommit = await githubRequest(
-    config,
-    `/repos/${config.owner}/${config.repository}/git/commits/${parentSha}`
-  );
-  const treeEntries = await Promise.all(files.map(async (file) => {
-    const blobSha = await createBlob(config, file.content, file.encoding || "utf-8");
-    return {
-      path: file.path,
-      mode: "100644",
-      type: "blob",
-      sha: blobSha
-    };
-  }));
-
-  const tree = await githubRequest(
-    config,
-    `/repos/${config.owner}/${config.repository}/git/trees`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ base_tree: parentCommit.tree.sha, tree: treeEntries })
-    }
-  );
-  const commit = await githubRequest(
-    config,
-    `/repos/${config.owner}/${config.repository}/git/commits`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        message: commitMessage,
-        tree: tree.sha,
-        parents: [parentSha]
-      })
-    }
-  );
-  await githubRequest(
-    config,
-    `/repos/${config.owner}/${config.repository}/git/refs/heads/${branchPath}`,
-    {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ sha: commit.sha, force: false })
-    }
-  );
 }
 
 module.exports = async (req, res) => {
@@ -300,7 +169,12 @@ module.exports = async (req, res) => {
       file: `assets/articles/${slug}.txt`,
       images: converted.images.map(({ path, alt }) => ({ path, alt }))
     };
-    const config = githubConfig();
+    let config;
+    try {
+      config = getGitHubConfig();
+    } catch (error) {
+      throw new RequestError(500, error.message);
+    }
     const articles = await getArticleIndex(config, config.branch);
     articles.push(article);
 
@@ -320,7 +194,7 @@ module.exports = async (req, res) => {
       }
     ];
 
-    await publishFiles(config, config.branch, files, `Publish article: ${title}`);
+    await commitFiles(config, config.branch, files, `Publish article: ${title}`);
     res.status(201).json({
       ok: true,
       warnings: conversion.messages.length,

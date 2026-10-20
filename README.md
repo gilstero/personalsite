@@ -9,3 +9,8 @@ The site currently includes:
 - Experience: work, research, and community involvement
 - Projects: games, experiments, and technical builds
 - Posts: DOCX article publishing and a public article reader
+- Kanban: a public ticket board that only the site owner can edit
+
+The Kanban board uses the existing admin password for ticket creation, status
+changes, and deletion. Tickets are stored in `assets/kanban/tickets.json` and
+persist through commits to the configured GitHub branch.

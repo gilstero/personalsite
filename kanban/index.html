@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Private Kanban board">
   <title>Kanban | Olin Gilster</title>
   <link rel="stylesheet" href="/style.css">
   <link rel="icon" type="image/x-icon" href="/assets/ps.png">
 </head>
-<body>
+<body class="kanban-page">
   <header>
     <nav>
       <strong>Olin Gilster</strong>
@@ -20,11 +21,280 @@
     </nav>
   </header>
 
-  <main>
-    <h1>Kanban</h1>
-    <p>This board is coming soon.</p>
+  <main class="kanban-main">
+    <div class="kanban-heading">
+      <h1>Kanban</h1>
+      <button id="board-action-button" class="save-note-button kanban-login-button" type="button">Log in</button>
+    </div>
+    <p id="board-status" class="kanban-status" role="status" aria-live="polite">Loading board...</p>
+    <section id="kanban-board" class="kanban-board" aria-label="Kanban board">
+      <section class="kanban-column todo-column" aria-labelledby="todo-heading">
+        <h2 id="todo-heading">Todo <span data-count="todo">0</span></h2>
+        <div class="kanban-ticket-list" data-status="todo"></div>
+      </section>
+      <section class="kanban-column progress-column" aria-labelledby="progress-heading">
+        <h2 id="progress-heading">In progress <span data-count="in-progress">0</span></h2>
+        <div class="kanban-ticket-list" data-status="in-progress"></div>
+      </section>
+      <section class="kanban-column review-column" aria-labelledby="review-heading">
+        <h2 id="review-heading">Review <span data-count="review">0</span></h2>
+        <div class="kanban-ticket-list" data-status="review"></div>
+      </section>
+      <section class="kanban-column complete-column" aria-labelledby="complete-heading">
+        <h2 id="complete-heading">Complete <span data-count="complete">0</span></h2>
+        <div class="kanban-ticket-list" data-status="complete"></div>
+      </section>
+    </section>
   </main>
-  <footer class="site-footer-bar">
+
+  <div id="modal-backdrop" class="modal-backdrop hidden"></div>
+
+  <section id="login-modal" class="modal-panel hidden" aria-hidden="true" aria-label="Kanban login">
+    <button id="close-login" class="modal-close" type="button" aria-label="Close login">&times;</button>
+    <form id="login-form" class="modal-form login-form">
+      <h2>Log in</h2>
+      <label for="admin-password">Password</label>
+      <input id="admin-password" class="password-input" type="password" autocomplete="current-password" required>
+      <button class="save-note-button kanban-submit-button" type="submit">Log in</button>
+      <p id="login-status" class="modal-status" role="status" aria-live="polite"></p>
+    </form>
+  </section>
+
+  <section id="ticket-modal" class="modal-panel hidden" aria-hidden="true" aria-label="Create ticket">
+    <button id="close-ticket-modal" class="modal-close" type="button" aria-label="Close ticket form">&times;</button>
+    <form id="ticket-form" class="modal-form">
+      <h2>Create ticket</h2>
+      <label for="ticket-title">Title</label>
+      <input id="ticket-title" class="password-input" type="text" maxlength="160" required>
+      <label for="ticket-description">Description</label>
+      <textarea id="ticket-description" class="kanban-description-input" maxlength="5000" rows="5" required></textarea>
+      <button id="save-ticket-button" class="save-note-button kanban-submit-button" type="submit">Create ticket</button>
+      <p id="ticket-status" class="modal-status" role="status" aria-live="polite"></p>
+    </form>
+  </section>
+
+  <script>
+    const statuses = [
+      { id: "todo", label: "Todo" },
+      { id: "in-progress", label: "In progress" },
+      { id: "review", label: "Review" },
+      { id: "complete", label: "Complete" }
+    ];
+    const boardActionButton = document.getElementById("board-action-button");
+    const boardStatus = document.getElementById("board-status");
+    const board = document.getElementById("kanban-board");
+    const loginModal = document.getElementById("login-modal");
+    const ticketModal = document.getElementById("ticket-modal");
+    const backdrop = document.getElementById("modal-backdrop");
+    const loginForm = document.getElementById("login-form");
+    const ticketForm = document.getElementById("ticket-form");
+    const passwordInput = document.getElementById("admin-password");
+    const loginStatus = document.getElementById("login-status");
+    const ticketStatus = document.getElementById("ticket-status");
+    const saveTicketButton = document.getElementById("save-ticket-button");
+    let adminAuthenticated = false;
+
+    function openModal(modal) {
+      modal.classList.remove("hidden");
+      modal.setAttribute("aria-hidden", "false");
+      backdrop.classList.remove("hidden");
+    }
+
+    function closeModal(modal) {
+      modal.classList.add("hidden");
+      modal.setAttribute("aria-hidden", "true");
+      if (loginModal.classList.contains("hidden") && ticketModal.classList.contains("hidden")) {
+        backdrop.classList.add("hidden");
+      }
+    }
+
+    async function apiRequest(method, body) {
+      const response = await fetch("/api/kanban", {
+        method,
+        headers: body ? { "Content-Type": "application/json" } : {},
+        body: body ? JSON.stringify(body) : undefined
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Kanban request failed.");
+      }
+      if (!Array.isArray(data.tickets)) {
+        throw new Error("The server returned an invalid ticket list.");
+      }
+      return data.tickets;
+    }
+
+    function createTicketCard(ticket) {
+      const card = document.createElement("article");
+      card.className = "kanban-ticket";
+
+      const heading = document.createElement("div");
+      heading.className = "kanban-ticket-heading";
+      const title = document.createElement("h3");
+      title.textContent = ticket.title;
+
+      heading.appendChild(title);
+
+      const description = document.createElement("p");
+      description.className = "kanban-ticket-description";
+      description.textContent = ticket.description;
+
+      card.append(heading, description);
+
+      if (adminAuthenticated) {
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.className = "kanban-delete-button";
+        deleteButton.setAttribute("aria-label", `Delete ${ticket.title}`);
+        deleteButton.innerHTML = `
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M9 3.75h6l.75 1.5H19.5a.75.75 0 0 1 0 1.5h-15a.75.75 0 0 1 0-1.5h3.75L9 3.75Zm.75 6a.75.75 0 0 1 .75.75v6a.75.75 0 0 1-1.5 0v-6a.75.75 0 0 1 .75-.75Zm4.5 0a.75.75 0 0 1 .75.75v6a.75.75 0 0 1-1.5 0v-6a.75.75 0 0 1 .75-.75ZM7.5 8.25h9l-.72 10.13A1.5 1.5 0 0 1 14.28 19.5H9.72a1.5 1.5 0 0 1-1.5-1.12L7.5 8.25Z"/>
+          </svg>
+        `;
+        deleteButton.addEventListener("click", () => mutateTicket("DELETE", { id: ticket.id }));
+        heading.appendChild(deleteButton);
+
+        const statusLabel = document.createElement("label");
+        statusLabel.className = "kanban-ticket-move";
+        statusLabel.textContent = "Move to ";
+        const statusSelect = document.createElement("select");
+        statusSelect.setAttribute("aria-label", `Move ${ticket.title}`);
+        statuses.forEach((status) => {
+          const option = document.createElement("option");
+          option.value = status.id;
+          option.textContent = status.label;
+          option.selected = status.id === ticket.status;
+          statusSelect.appendChild(option);
+        });
+        statusSelect.addEventListener("change", () => {
+          mutateTicket("PATCH", { id: ticket.id, status: statusSelect.value });
+        });
+        statusLabel.appendChild(statusSelect);
+        card.appendChild(statusLabel);
+      }
+
+      return card;
+    }
+
+    function renderTickets(tickets) {
+      statuses.forEach((status) => {
+        const column = document.querySelector(`.kanban-ticket-list[data-status="${status.id}"]`);
+        const matchingTickets = tickets.filter((ticket) => ticket.status === status.id);
+        column.replaceChildren(...matchingTickets.map(createTicketCard));
+        document.querySelector(`[data-count="${status.id}"]`).textContent = matchingTickets.length;
+      });
+    }
+
+    async function loadBoard() {
+      boardStatus.textContent = "Loading board...";
+      boardStatus.classList.remove("is-error");
+      try {
+        const tickets = await apiRequest("GET");
+        renderTickets(tickets);
+        board.classList.remove("hidden");
+        boardActionButton.textContent = adminAuthenticated ? "Create ticket" : "Log in";
+        boardStatus.textContent = adminAuthenticated ? "" : "Tickets are public. Log in to manage the board.";
+      } catch (error) {
+        boardStatus.textContent = error.message;
+        boardStatus.classList.add("is-error");
+      }
+    }
+
+    async function mutateTicket(method, body) {
+      boardStatus.textContent = "";
+      try {
+        renderTickets(await apiRequest(method, body));
+      } catch (error) {
+        boardStatus.textContent = error.message;
+        boardStatus.classList.add("is-error");
+      }
+    }
+
+    boardActionButton.addEventListener("click", () => {
+      if (adminAuthenticated) {
+        ticketStatus.textContent = "";
+        ticketForm.reset();
+        openModal(ticketModal);
+        document.getElementById("ticket-title").focus();
+        return;
+      }
+
+      loginStatus.textContent = "";
+      passwordInput.value = "";
+      openModal(loginModal);
+      passwordInput.focus();
+    });
+
+    loginForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      loginStatus.textContent = "";
+      try {
+        const response = await fetch("/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password: passwordInput.value })
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || "Login failed.");
+        }
+        adminAuthenticated = true;
+        closeModal(loginModal);
+        await loadBoard();
+      } catch (error) {
+        loginStatus.textContent = error.message || "Could not reach the login service.";
+      }
+    });
+
+    ticketForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      saveTicketButton.disabled = true;
+      ticketStatus.textContent = "Creating ticket...";
+      try {
+        const tickets = await apiRequest("POST", {
+          title: document.getElementById("ticket-title").value.trim(),
+          description: document.getElementById("ticket-description").value.trim()
+        });
+        renderTickets(tickets);
+        closeModal(ticketModal);
+      } catch (error) {
+        ticketStatus.textContent = error.message;
+      } finally {
+        saveTicketButton.disabled = false;
+      }
+    });
+
+    document.getElementById("close-login").addEventListener("click", () => closeModal(loginModal));
+    document.getElementById("close-ticket-modal").addEventListener("click", () => closeModal(ticketModal));
+    backdrop.addEventListener("click", () => {
+      closeModal(loginModal);
+      closeModal(ticketModal);
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        closeModal(loginModal);
+        closeModal(ticketModal);
+      }
+    });
+
+    fetch("/api/session")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Could not verify your session. Check the server configuration and try again.");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        adminAuthenticated = Boolean(data.authenticated);
+        loadBoard();
+      })
+      .catch(() => {
+        adminAuthenticated = false;
+        loadBoard();
+      });
+  </script>
+
+  <footer class="site-footer-bar kanban-footer">
     <div class="site-footer-inner">
       <a class="site-footer-link" href="https://github.com/gilstero" target="_blank" rel="noopener noreferrer">
         <strong>Website Code</strong>
