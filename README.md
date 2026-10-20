@@ -14,3 +14,7 @@ The site currently includes:
 The Kanban board uses the existing admin password for ticket creation, status
 changes, and deletion. Tickets are stored in `assets/kanban/tickets.json` and
 persist through commits to the configured GitHub branch.
+
+Vercel Web Analytics is included on the site's HTML pages. Enable it for this
+project from **Analytics** in the Vercel dashboard, then deploy the site to
+start collecting page views.
