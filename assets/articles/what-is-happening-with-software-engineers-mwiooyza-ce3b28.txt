@@ -1,0 +1,13 @@
+What is Happening in the Software Engineer Job Space?
+
+Beyond the doom and gloom of hiring data coming out there is a surprising trend emerging: software engineer job postings are growing. The holy grail of this metric comes from the Federal Reserve Bank of St. Louis which shows that current postings are only 81% of what they were before the 2020 Covid Pandemic.
+
+[[ARTICLE_IMAGE_0]]
+
+Source: Federal Reserve Bank of St. Louis
+
+Interestingly though, these numbers don’t tell the full story. According to Indeed, before the Covid-era shakeup to engineering roles, around 55% of postings for software engineers were senior level. Now, Business Insider estimates that 70% of the current postings are senior level. If we apply some real numbers to this situation in the 12-month period ending in April of 2026 there were 113,000 software engineers hired. If that represents 81% of the market, assuming all of these roles were filled (which is a lot of handwaving), there were about 140,000 software engineers hired in 2019.
+
+But here is where it gets interesting. Because the makeup of seniority changed, the amount of new grad openings in 2019 was ~63,000 while in 2026 it was only ~34,000. The market for new grads has almost halved over a 7 year period. Meanwhile, American universities went from almost exactly meeting demand by graduating between 56,000 - 75,000 Computer Science Majors a year in 2019 they dramatically over produced in 2026 graduating ~122,000 a year according to the National Science Foundation.
+
+If you are a senior engineer, however, the story is much different. In 2019 there were ~77,000 senior engineers hired while in 2026 there were ~79,000 senior engineers hired. While this is miniscule job growth over 7 years it shows that the senior level engineering role is relatively stable. While negativity is pervasive in the software engineering space, these job hiring numbers show promise for the future of software engineering. If we are to believe that roles will continue to be in demand for the profession, the glut in new software engineer hirings will put strain on the overall number of senior engineers in 5 - 10 years. For engineers already in the field this gives them stronger negotiating power for salaries, working medium, and hours which could (strong emphasis on could) user in a new golden age in the field.
